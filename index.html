@@ -1,0 +1,2963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="manifest" href="./manifest.webmanifest"/>
+<meta name="theme-color" content="#3c6b35"/>
+<meta name="robots" content="noindex,nofollow"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<title>ECCA Litter Study</title>
+<style>
+/* ── Reset & base ─────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}
+body{
+  font-family:'Segoe UI',system-ui,sans-serif;
+  background:#f5f7f2;
+  color:#1e2a1a;
+  min-height:100vh;
+  display:flex;flex-direction:column;
+}
+
+/* ── Colour tokens ────────────────────────────────────── */
+:root{
+  --green-dark:#2d5a27;
+  --green-mid:#4a7c42;
+  --green-light:#d4e8cf;
+  --green-pale:#eef4ec;
+  --accent:#7ab648;
+  --amber:#e07b39;
+  --amber-light:#fdf0e8;
+  --red:#c0392b;
+  --red-light:#fdecea;
+  --blue:#2a6496;
+  --blue-light:#e8f2fa;
+  --border:#c8d8c0;
+  --surface:#ffffff;
+  --text:#1e2a1a;
+  --text-mid:#4a5a44;
+  --text-light:#7a8a74;
+  --chip-off:#eef4ec;
+  --chip-off-border:#b0c8a8;
+  --chip-on-bg:var(--green-mid);
+  --chip-on-text:#fff;
+  --radius:8px;
+  --shadow:0 1px 4px rgba(0,0,0,.10);
+}
+
+/* ── Header ───────────────────────────────────────────── */
+header{
+  background:var(--green-dark);
+  color:#fff;
+  padding:10px 16px 0;
+}
+header h1{font-size:1.05rem;font-weight:700;letter-spacing:.02em;margin-bottom:2px}
+header .sub{font-size:.75rem;opacity:.75;margin-bottom:8px}
+
+/* ── Tabs ─────────────────────────────────────────────── */
+nav.tabs{display:flex;gap:2px;overflow-x:auto;padding-bottom:0}
+nav.tabs button{
+  flex:1 1 auto;
+  padding:8px 6px 7px;
+  border:none;
+  background:rgba(255,255,255,.12);
+  color:rgba(255,255,255,.8);
+  font-size:.78rem;font-weight:600;
+  border-radius:6px 6px 0 0;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:background .15s,color .15s;
+  min-width:52px;
+}
+nav.tabs button.active{background:#fff;color:var(--green-dark);}
+nav.tabs button:not(.active):hover{background:rgba(255,255,255,.22)}
+
+/* ── Context banner ───────────────────────────────────── */
+#ctx-banner{
+  background:var(--green-light);
+  border-bottom:1px solid var(--border);
+  padding:6px 14px;
+  font-size:.8rem;
+  color:var(--green-dark);
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+#ctx-banner span{font-weight:700}
+#ctx-banner .ctx-badge{
+  background:var(--green-mid);color:#fff;
+  border-radius:20px;padding:1px 10px;font-size:.75rem;
+}
+
+/* ── Main content ─────────────────────────────────────── */
+main{flex:1;overflow-y:auto}
+.tab-panel{display:none;padding:14px}
+.tab-panel.active{display:block}
+
+/* ── Cards ────────────────────────────────────────────── */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:14px;
+  margin-bottom:14px;
+  box-shadow:var(--shadow);
+}
+.card-title{
+  font-size:.8rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;
+  color:var(--text-mid);margin-bottom:10px;
+}
+
+/* ── Field groups ─────────────────────────────────────── */
+.field{margin-bottom:14px}
+.field label{
+  display:block;font-size:.82rem;font-weight:600;
+  color:var(--text);margin-bottom:5px;
+}
+.field label .opt{font-weight:400;color:var(--text-light);font-size:.75rem;margin-left:4px}
+.field input,.field textarea,.field select{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:9px 11px;
+  font-size:.95rem;
+  font-family:inherit;
+  background:#fff;
+  color:var(--text);
+  transition:border-color .15s;
+}
+.field input:focus,.field textarea:focus,.field select:focus{
+  outline:none;border-color:var(--green-mid);
+  box-shadow:0 0 0 2px rgba(74,124,66,.15);
+}
+.field textarea{min-height:70px;resize:vertical}
+.field-error{
+  color:var(--red);font-size:.78rem;margin-top:4px;display:none;
+}
+.field.has-error input,.field.has-error textarea,.field.has-error select{
+  border-color:var(--red);
+}
+.field.has-error .field-error{display:block}
+
+/* ── Chip buttons ─────────────────────────────────────── */
+.chip-group{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+.chip{
+  display:inline-flex;align-items:center;
+  padding:12px 16px;
+  min-height:44px;
+  border:1.5px solid var(--chip-off-border);
+  border-radius:22px;
+  background:var(--chip-off);
+  color:var(--text);
+  font-size:.88rem;font-weight:500;
+  cursor:pointer;
+  transition:background .12s,border-color .12s,color .12s;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.chip:hover{border-color:var(--green-mid)}
+.chip.selected{
+  background:var(--chip-on-bg);
+  border-color:var(--chip-on-bg);
+  color:var(--chip-on-text);
+}
+.chip.toggle-chip{border-radius:8px}
+
+/* ── Sub-group indent ─────────────────────────────────── */
+.sub-group{
+  margin-top:8px;
+  padding:10px 12px;
+  background:var(--green-pale);
+  border-left:3px solid var(--accent);
+  border-radius:0 6px 6px 0;
+}
+.sub-group .sub-label{
+  font-size:.78rem;font-weight:600;color:var(--text-mid);
+  margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;
+}
+
+/* ── Buttons ──────────────────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:11px 20px;
+  border:none;border-radius:var(--radius);
+  font-size:.92rem;font-weight:600;font-family:inherit;
+  cursor:pointer;
+  transition:background .15s,opacity .15s;
+  width:100%;
+}
+.btn-primary{background:var(--green-mid);color:#fff}
+.btn-primary:hover{background:var(--green-dark)}
+.btn-secondary{background:var(--green-light);color:var(--green-dark);border:1.5px solid var(--border)}
+.btn-secondary:hover{background:#c4dcc0}
+.btn-danger{background:var(--red-light);color:var(--red);border:1.5px solid #f0c0bb}
+.btn-danger:hover{background:#f8d7d4}
+.btn-amber{background:var(--amber-light);color:var(--amber);border:1.5px solid #f0c8a8}
+.btn-amber:hover{background:#fae4cc}
+.btn-blue{background:var(--blue-light);color:var(--blue);border:1.5px solid #b8d4ea}
+.btn-blue:hover{background:#d4e8f6}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-row{display:flex;gap:8px;margin-top:10px}
+.btn-row .btn{flex:1}
+.btn-sm{padding:7px 12px;font-size:.8rem;width:auto}
+
+/* ── Status messages ──────────────────────────────────── */
+.status-msg{
+  border-radius:var(--radius);padding:10px 14px;
+  font-size:.85rem;margin-bottom:12px;display:none;
+}
+.status-msg.show{display:block}
+.status-msg.success{background:#e8f5e8;color:#2a6b28;border:1px solid #b0d8b0}
+.status-msg.error{background:var(--red-light);color:var(--red);border:1px solid #f0c0bb}
+.status-msg.info{background:var(--blue-light);color:var(--blue);border:1px solid #b8d4ea}
+.status-msg.warn{background:var(--amber-light);color:var(--amber);border:1px solid #f0c8a8}
+
+/* ── Brand search ─────────────────────────────────────── */
+.brand-wrap{position:relative}
+.brand-wrap input{padding-right:32px}
+.brand-dropdown{
+  position:absolute;top:calc(100% + 2px);left:0;right:0;
+  background:#fff;border:1px solid var(--border);
+  border-radius:6px;max-height:180px;overflow-y:auto;
+  z-index:100;box-shadow:0 4px 12px rgba(0,0,0,.12);
+  display:none;
+}
+.brand-dropdown.open{display:block}
+.brand-item{
+  padding:9px 12px;font-size:.88rem;cursor:pointer;
+  border-bottom:1px solid #f0f0f0;
+}
+.brand-item:last-child{border-bottom:none}
+.brand-item:hover,.brand-item.highlighted{background:var(--green-pale)}
+
+/* ── Review ───────────────────────────────────────────── */
+.review-row{
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:10px 12px;margin-bottom:8px;
+  background:#fff;
+}
+.review-row .rr-head{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  font-size:.82rem;font-weight:600;color:var(--text);margin-bottom:4px;
+}
+.review-row .rr-meta{font-size:.75rem;color:var(--text-light)}
+.review-row .rr-actions{display:flex;gap:6px;margin-top:8px}
+.badge{
+  display:inline-block;border-radius:20px;
+  padding:1px 8px;font-size:.72rem;font-weight:600;
+}
+.badge-green{background:var(--green-light);color:var(--green-dark)}
+.badge-amber{background:var(--amber-light);color:var(--amber)}
+.badge-red{background:var(--red-light);color:var(--red)}
+.badge-blue{background:var(--blue-light);color:var(--blue)}
+
+/* ── Guide ────────────────────────────────────────────── */
+.guide-nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.guide-nav a{
+  padding:6px 12px;border-radius:20px;
+  background:var(--green-light);color:var(--green-dark);
+  font-size:.78rem;font-weight:600;text-decoration:none;
+  border:1px solid var(--border);
+}
+details{
+  background:#fff;border:1px solid var(--border);
+  border-radius:var(--radius);margin-bottom:10px;
+  box-shadow:var(--shadow);
+}
+details summary{
+  padding:12px 14px;font-weight:700;font-size:.88rem;
+  cursor:pointer;color:var(--green-dark);
+  list-style:none;display:flex;justify-content:space-between;align-items:center;
+}
+details summary::after{content:'▾';font-size:.75rem;color:var(--text-light)}
+details[open] summary::after{content:'▴'}
+details summary::-webkit-details-marker{display:none}
+.guide-body{padding:0 14px 14px;font-size:.85rem;color:var(--text);line-height:1.6}
+.guide-body p{margin-bottom:8px}
+.guide-body ul{padding-left:18px;margin-bottom:8px}
+.guide-body li{margin-bottom:4px}
+.guide-body .example{
+  background:var(--green-pale);border-left:3px solid var(--accent);
+  padding:7px 10px;border-radius:0 5px 5px 0;margin:8px 0;font-style:italic;
+}
+
+/* ── Modal/Popup ──────────────────────────────────────── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);
+  z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;
+  display:none;
+}
+.modal-overlay.open{display:flex}
+.modal-box{
+  background:#fff;border-radius:12px;padding:22px;
+  max-width:380px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.18);
+}
+.modal-box h3{font-size:1rem;font-weight:700;margin-bottom:10px;color:var(--green-dark)}
+.modal-box p{font-size:.87rem;color:var(--text-mid);margin-bottom:14px;line-height:1.5}
+.modal-box .modal-btns{display:flex;flex-direction:column;gap:8px}
+
+/* ── Weights tab ──────────────────────────────────────── */
+.weight-context{
+  background:var(--green-pale);border:1px solid var(--border);
+  border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;
+}
+.weight-context .wc-label{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-light);margin-bottom:4px}
+.weight-context .wc-val{font-size:1.05rem;font-weight:700;color:var(--green-dark)}
+
+/* ── Utility ──────────────────────────────────────────── */
+.hidden{display:none!important}
+.divider{height:1px;background:var(--border);margin:14px 0}
+.text-center{text-align:center}
+.mt8{margin-top:8px}
+.mt12{margin-top:12px}
+/* ── Quantity stepper ─────────────────────────────────── */
+.qty-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.qty-btn{
+  width:56px;height:52px;flex:0 0 auto;
+  border:1.5px solid var(--green-mid);background:var(--green-pale);
+  color:var(--green-dark);border-radius:10px;
+  font-size:1.6rem;font-weight:700;line-height:1;
+  cursor:pointer;font-family:inherit;
+  -webkit-tap-highlight-color:transparent;
+}
+.qty-btn:active{background:var(--green-mid);color:#fff}
+.qty-btn:disabled{opacity:.35;cursor:default}
+#item-quantity{
+  flex:1 1 auto;min-width:0;text-align:center;
+  font-size:1.7rem;font-weight:700;color:var(--green-dark);
+  border:1.5px solid var(--border);border-radius:10px;
+  padding:8px 4px;font-family:inherit;background:#fff;
+  -moz-appearance:textfield;
+}
+#item-quantity::-webkit-outer-spin-button,
+#item-quantity::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.qty-quick{
+  padding:10px 14px;min-height:44px;
+  border:1.5px solid var(--chip-off-border);background:var(--chip-off);
+  color:var(--text);border-radius:22px;
+  font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit;
+  -webkit-tap-highlight-color:transparent;
+}
+.qty-quick:active{background:var(--green-mid);color:#fff;border-color:var(--green-mid)}
+.qty-note{font-size:.78rem;color:var(--text-mid);margin-bottom:8px;line-height:1.4}
+.qty-badge{
+  display:inline-block;background:var(--green-dark);color:#fff;
+  border-radius:20px;padding:2px 9px;font-size:.75rem;font-weight:700;margin-left:6px;
+}
+
+/* ── Presets ──────────────────────────────────────────── */
+#preset-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.preset-chip{
+  display:inline-flex;align-items:center;gap:0;
+  border:1.5px solid var(--green-mid);background:var(--green-pale);
+  border-radius:22px;overflow:hidden;min-height:44px;
+}
+.preset-apply{
+  background:none;border:none;padding:11px 6px 11px 15px;
+  color:var(--green-dark);font-size:.86rem;font-weight:600;
+  cursor:pointer;font-family:inherit;
+  -webkit-tap-highlight-color:transparent;
+}
+.preset-apply:active{background:var(--green-mid);color:#fff}
+.preset-del{
+  background:none;border:none;padding:11px 13px 11px 6px;
+  color:var(--text-light);font-size:1rem;line-height:1;
+  cursor:pointer;font-family:inherit;
+}
+.preset-del:active{color:var(--red)}
+.preset-empty{font-size:.8rem;color:var(--text-light);font-style:italic}
+
+/* ── First-run setup ──────────────────────────────────── */
+#setup-overlay{
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  z-index:900;                       /* above header (100) and modals (200) */
+  background:#f5f7f2;                /* opaque — must never show the app behind it */
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  display:flex;flex-direction:column;align-items:center;
+  padding:0 0 48px;
+}
+#setup-overlay.hidden{display:none}
+/* While setup is open, the app behind it is hidden outright rather than
+   merely covered — belt and braces against any stacking surprise. */
+body.setup-open > *:not(#setup-overlay){display:none !important}
+
+/* Banner so the screen reads as the app's front door, not a stray dialog */
+.setup-banner{
+  width:100%;box-sizing:border-box;
+  background:var(--green-dark);color:#fff;
+  padding:20px 18px;text-align:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+.setup-banner h1{font-size:1.15rem;margin:0;font-weight:700;letter-spacing:.01em}
+.setup-banner .sub{font-size:.82rem;opacity:.85;margin-top:3px}
+
+.setup-box{
+  width:100%;max-width:460px;box-sizing:border-box;
+  margin:24px auto 0;padding:24px 22px 22px;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  box-shadow:0 4px 18px rgba(0,0,0,.09);
+}
+.setup-box h2{font-size:1.1rem;margin:0 0 8px;color:var(--green-dark)}
+#setup-intro{font-size:.88rem;color:var(--text-mid);line-height:1.55;margin:0 0 4px}
+.setup-label{display:block;font-size:.76rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--text-mid);margin:18px 0 6px}
+#setup-overlay input{
+  width:100%;box-sizing:border-box;padding:12px;font-size:16px;
+  border:1.5px solid var(--border);border-radius:8px;font-family:inherit;
+  background:#fff;color:var(--text);
+}
+#setup-overlay input:focus{outline:none;border-color:var(--green-mid);
+  box-shadow:0 0 0 3px rgba(74,124,66,.16)}
+#setup-overlay input::placeholder{color:#9aa894}
+.setup-hint{font-size:.75rem;color:var(--text-light);margin-top:5px;line-height:1.45}
+#setup-overlay .btn{min-height:50px;font-size:.98rem}
+.setup-link{
+  display:block;width:100%;margin-top:4px;padding:12px;
+  background:none;border:none;color:var(--text-mid);
+  font-size:.83rem;text-decoration:underline;cursor:pointer;font-family:inherit;
+}
+.setup-foot{font-size:.78rem;color:var(--text-light);line-height:1.5;margin-top:18px;
+  padding-top:14px;border-top:1px solid var(--border)}
+
+@media (max-width:520px){
+  .setup-box{margin-top:16px;border-radius:0;border-left:none;border-right:none;padding:20px 16px}
+}
+.conn-settings-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#conn-current{font-size:.76rem;color:var(--text-light);word-break:break-all;margin-top:8px}
+
+.queue-count{
+  display:inline-block;background:var(--amber);color:#fff;
+  border-radius:20px;padding:1px 7px;font-size:.72rem;font-weight:700;
+  margin-left:6px;
+}
+
+/* ── Connection indicator ─────────────────────────────── */
+.conn-dot{
+  display:inline-block;width:9px;height:9px;border-radius:50%;
+  background:var(--accent);margin-right:5px;vertical-align:middle;
+  box-shadow:0 0 0 2px rgba(255,255,255,.25);
+}
+.conn-dot.offline{background:var(--amber)}
+.conn-dot.checking{background:var(--text-light);animation:connpulse 1s ease-in-out infinite}
+@keyframes connpulse{0%,100%{opacity:.35}50%{opacity:1}}
+#conn-status{
+  font-size:.72rem;opacity:.85;display:inline-flex;align-items:center;
+}
+header .hdr-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+
+/* ── Item counter in context banner ───────────────────── */
+#ctx-banner .ctx-count{
+  background:var(--surface);color:var(--green-dark);
+  border:1px solid var(--green-mid);
+  border-radius:20px;padding:1px 10px;font-size:.75rem;font-weight:700;
+  margin-left:auto;
+}
+
+/* ── Sticky save bar (Items tab) ──────────────────────── */
+.sticky-save{
+  position:sticky;bottom:0;left:0;right:0;
+  background:rgba(245,247,242,.97);
+  backdrop-filter:blur(6px);
+  border-top:1px solid var(--border);
+  padding:10px 0 4px;
+  margin:14px -14px 0;
+  padding-left:14px;padding-right:14px;
+  z-index:50;
+}
+.sticky-save .btn-row{margin-top:0}
+.sticky-save .btn{min-height:48px}
+
+/* ── Brand dropdown group headers ─────────────────────── */
+.brand-group{
+  padding:6px 12px 4px;
+  font-size:.68rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:var(--text-light);
+  background:var(--green-pale);
+  border-bottom:1px solid #f0f0f0;
+  position:sticky;top:0;
+}
+.brand-item.recent-item{background:#fffdf5}
+.brand-dropdown{max-height:240px}
+
+/* ── Sub-group nesting depth ──────────────────────────── */
+.sub-group .sub-group{background:#fff;border-left-color:var(--green-mid)}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══════════════════════════════════════════════ -->
+<header>
+  <div class="hdr-top">
+    <div>
+      <h1>ECCA Litter Study</h1>
+      <div class="sub">Roadside Litter Categorization Applet</div>
+    </div>
+    <div id="conn-status" title="Connection status">
+      <span class="conn-dot" id="conn-dot"></span><span id="conn-label">Online</span>
+    </div>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button class="active" data-tab="bag"     role="tab">Bag</button>
+    <button            data-tab="items"   role="tab">Items</button>
+    <button            data-tab="weights" role="tab">Plastic Weight</button>
+    <button            data-tab="review"  role="tab">Review</button>
+    <button            data-tab="guide"   role="tab">Guide</button>
+  </nav>
+</header>
+
+<!-- Context banner (Items/Plastic Weight tabs) -->
+<div id="ctx-banner" class="hidden">
+  Active bag: <span id="ctx-tid">—</span> / <span id="ctx-bag">—</span>
+  <span class="ctx-count" id="ctx-item-count">0 items</span>
+</div>
+
+<!-- ══ MAIN ════════════════════════════════════════════════ -->
+<main>
+
+<!-- ─── BAG TAB ──────────────────────────────────────────── -->
+<div class="tab-panel active" id="panel-bag">
+  <div class="card">
+    <div class="card-title">Bag Information</div>
+
+    <div class="field" id="f-transect">
+      <label>Transect ID</label>
+      <input type="text" id="bag-transect" placeholder="e.g. T-01" autocomplete="off"/>
+      <div class="field-error" id="err-transect">Enter a transect ID.</div>
+    </div>
+
+    <div class="field" id="f-bagnum">
+      <label>Bag Number</label>
+      <input type="text" id="bag-number" placeholder="e.g. 3" autocomplete="off"/>
+      <div class="field-error" id="err-bagnum">Enter a bag number.</div>
+    </div>
+
+    <div class="field">
+      <label>Classifier Name <span class="opt">optional</span></label>
+      <input type="text" id="bag-classifier" placeholder="Your name" autocomplete="off"/>
+    </div>
+
+    <div class="field" id="f-date">
+      <label>Collection Date</label>
+      <input type="date" id="bag-date"/>
+      <div class="field-error" id="err-date">Select a date.</div>
+    </div>
+
+    <div class="field" id="f-weight">
+      <label>Bag Weight (lbs)</label>
+      <input type="number" id="bag-weight" placeholder="e.g. 2.5" min="0" step="0.01"/>
+      <div class="field-error" id="err-weight">Enter the bag weight (required).</div>
+    </div>
+
+    <div class="field">
+      <label>Field Notes <span class="opt">optional</span></label>
+      <textarea id="bag-notes" placeholder="Any notes about this bag…"></textarea>
+    </div>
+
+    <div id="bag-status" class="status-msg"></div>
+
+    <button class="btn btn-primary" id="btn-save-bag">Save Bag Record &amp; Go to Item Entry</button>
+
+    <div id="change-bag-info-form" class="hidden" style="margin-top:14px">
+      <div class="divider"></div>
+      <div class="card-title">Update Bag Info</div>
+      <div class="field">
+        <label>New Transect ID</label>
+        <input type="text" id="change-transect" autocomplete="off"/>
+      </div>
+      <div class="field">
+        <label>New Bag Number</label>
+        <input type="text" id="change-bagnum" autocomplete="off"/>
+      </div>
+      <button class="btn btn-primary mt8" id="btn-update-bag-info">Update Bag Info</button>
+      <button class="btn btn-secondary mt8" id="btn-cancel-bag-info" style="margin-top:8px">Cancel Bag Info Changes</button>
+    </div>
+  </div>
+
+  <!-- Edit/delete last bag -->
+  <div id="last-bag-card" class="card hidden">
+    <div class="card-title">Last Submitted Bag (this device)</div>
+    <div id="last-bag-summary" class="review-row" style="margin-bottom:8px"></div>
+    <div class="btn-row">
+      <button class="btn btn-amber btn-sm" id="btn-edit-bag">Edit / Resubmit</button>
+      <button class="btn btn-danger btn-sm" id="btn-delete-bag">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── ITEMS TAB ─────────────────────────────────────────── -->
+<div class="tab-panel" id="panel-items">
+
+  <div class="card" id="preset-card">
+    <div class="card-title">Quick Presets</div>
+    <p class="qty-note">Tap a preset to fill the whole form at once, then set the quantity. Presets are saved on this device.</p>
+    <div id="preset-list"></div>
+    <button class="btn btn-blue btn-sm" id="btn-save-preset">Save current form as a preset</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Material <span style="color:var(--red)">*</span></div>
+    <div class="chip-group" id="chips-material"
+         data-field="material" data-required="true" data-multi="false">
+      <div class="chip" data-value="paper_cardboard">Paper/Cardboard</div>
+      <div class="chip" data-value="plastic">Plastic</div>
+      <div class="chip" data-value="glass">Glass</div>
+      <div class="chip" data-value="metal">Metal</div>
+      <div class="chip" data-value="wood">Wood</div>
+      <div class="chip" data-value="textile">Textile</div>
+      <div class="chip" data-value="other">Other</div>
+    </div>
+    <div class="field-error" id="err-material" style="display:none;margin-top:6px">Select a material.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Quantity</div>
+    <p class="qty-note">How many <strong>identical</strong> items does this record cover? Use this for piles of the same thing &mdash; cigarette butts, paper fragments, wood pieces. Leave at 1 for a single item.</p>
+    <div class="qty-row">
+      <button type="button" class="qty-btn" id="qty-minus" aria-label="Decrease quantity">&minus;</button>
+      <input type="number" id="item-quantity" value="1" min="1" step="1" inputmode="numeric" pattern="[0-9]*" aria-label="Quantity">
+      <button type="button" class="qty-btn" id="qty-plus" aria-label="Increase quantity">+</button>
+    </div>
+    <div class="chip-group">
+      <button type="button" class="qty-quick" data-add="5">+5</button>
+      <button type="button" class="qty-quick" data-add="10">+10</button>
+      <button type="button" class="qty-quick" data-add="25">+25</button>
+      <button type="button" class="qty-quick" data-set="1">Reset to 1</button>
+    </div>
+    <div class="field-error" id="err-quantity" style="display:none;margin-top:6px">Quantity must be a whole number of 1 or more.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Functional Categories <span class="opt" style="text-transform:none;letter-spacing:0;font-size:.78rem">(select all that apply)</span></div>
+
+    <!-- Food/Beverage Container -->
+    <div class="chip toggle-chip" data-value="food_container" id="chip-food" data-sub="sub-food">Food/Beverage Container</div>
+    <div class="sub-group hidden" id="sub-food" style="margin-top:8px">
+      <div class="sub-label">Food/Beverage Container sub-types</div>
+      <div class="chip-group">
+        <div class="chip toggle-chip" data-value="takeout" id="chip-takeout">Takeout Container</div>
+        <div class="chip toggle-chip" data-value="beverage" id="chip-beverage" data-sub="sub-beverage">Beverage Container</div>
+        <div class="chip toggle-chip" data-value="food_other" id="chip-food-other">Other Food Packaging</div>
+      </div>
+      <div class="sub-group hidden" id="sub-beverage" style="margin-top:8px">
+        <div class="sub-label">Optional beverage details</div>
+        <div class="chip-group">
+          <div class="chip toggle-chip" data-value="alcoholic" id="chip-alcoholic">Alcoholic</div>
+          <div class="chip toggle-chip" data-value="recyclable" id="chip-recyclable">Redeemable (Bottle Bill)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider" style="margin:10px 0"></div>
+
+    <!-- Commercial Paperwork & Tags -->
+    <div class="chip toggle-chip" data-value="paperwork_tags" id="chip-paperwork-tags" data-sub="sub-paperwork">Commercial Paperwork &amp; Tags</div>
+    <div class="sub-group hidden" id="sub-paperwork" style="margin-top:8px">
+      <div class="sub-label">Paperwork &amp; tag sub-types</div>
+      <div class="chip-group">
+        <div class="chip toggle-chip" data-value="lumber_tags" id="chip-lumber-tags">Lumber Tags</div>
+        <div class="chip toggle-chip" data-value="paperwork" id="chip-paperwork">Paperwork</div>
+        <div class="chip toggle-chip" data-value="other_tags_labels" id="chip-other-tags">Other Tags &amp; Labels</div>
+      </div>
+    </div>
+
+    <div class="divider" style="margin:10px 0"></div>
+
+    <!-- Fasteners, Packaging & Wrappers -->
+    <div class="chip toggle-chip" data-value="fasteners_packaging" id="chip-fasteners" data-sub="sub-fasteners">Fasteners, Packaging &amp; Wrappers</div>
+    <div class="sub-group hidden" id="sub-fasteners" style="margin-top:8px">
+      <div class="sub-label">Origin</div>
+      <div class="chip-group">
+        <div class="chip toggle-chip" data-value="fp_commercial" id="chip-fp-commercial">Commercial</div>
+        <div class="chip toggle-chip" data-value="fp_noncommercial" id="chip-fp-noncommercial">Non-commercial</div>
+        <div class="chip toggle-chip" data-value="fp_unknown" id="chip-fp-unknown">Unknown</div>
+      </div>
+    </div>
+
+    <div class="divider" style="margin:10px 0"></div>
+
+    <div class="chip-group" style="flex-direction:column;gap:7px">
+      <div class="chip toggle-chip" data-value="advertising_promo">Advertising &amp; Promotion</div>
+      <div class="chip toggle-chip" data-value="toxic_fluid">Toxic Fluid Container</div>
+      <div class="chip toggle-chip" data-value="automotive">Automotive Debris</div>
+      <div class="chip toggle-chip" data-value="construction">Construction/Demolition Debris</div>
+      <div class="chip toggle-chip" data-value="lawn_garden">Lawn/Garden Care</div>
+      <div class="chip toggle-chip" data-value="marina">Marina-Related</div>
+      <div class="chip toggle-chip" data-value="smoking">Smoking Paraphernalia</div>
+      <div class="chip toggle-chip" data-value="attire">Attire</div>
+      <div class="chip toggle-chip" data-value="furniture">Furniture</div>
+      <div class="chip toggle-chip" data-value="other_functional">Other</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Likely Source <span class="opt" style="text-transform:none;letter-spacing:0;font-size:.78rem">(optional — Unknown is always acceptable)</span></div>
+    <div class="chip-group" id="chips-source" data-field="likely_source" data-multi="false">
+      <div class="chip" data-value="intentional">Intentional Litter</div>
+      <div class="chip" data-value="unsecured">Unsecured Loads</div>
+      <div class="chip" data-value="commercial">Commercial Haulers</div>
+      <div class="chip" data-value="unknown">Unknown</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Brand <span class="opt" style="text-transform:none;letter-spacing:0;font-size:.78rem">(optional)</span></div>
+    <div class="brand-wrap">
+      <input type="text" id="brand-search" placeholder="Search or type brand…" autocomplete="off" aria-label="Brand search"/>
+      <div class="brand-dropdown" id="brand-dropdown"></div>
+    </div>
+    <div id="brand-selected-display" class="hidden" style="margin-top:8px">
+      Selected: <strong id="brand-selected-name"></strong>
+      <button class="btn btn-secondary btn-sm" id="btn-clear-brand" style="margin-top:6px">Clear brand</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Size <span class="opt" style="text-transform:none;letter-spacing:0;font-size:.78rem">(optional — measure the item's longest side)</span></div>
+    <p style="font-size:.78rem;color:var(--text-mid);margin:-4px 0 8px">All item measurements are taken along the <strong>longest side</strong> of the item as found.</p>
+    <div class="chip-group" id="chips-size" data-field="size" data-multi="false">
+      <div class="chip" data-value="small">Small (&lt;3 in)</div>
+      <div class="chip" data-value="medium">Medium (3–6 in)</div>
+      <div class="chip" data-value="large">Large (6 in – 2 ft)</div>
+      <div class="chip" data-value="very_large">Very Large (&gt;2 ft)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Fragmentation</div>
+    <div class="chip toggle-chip" data-value="fragment" id="chip-fragment">This item is a fragment of a larger item</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Notes <span class="opt" style="text-transform:none;letter-spacing:0;font-size:.78rem">(optional)</span></div>
+    <div class="field" style="margin:0">
+      <textarea id="item-notes" placeholder="Anything unusual about this item…"></textarea>
+    </div>
+  </div>
+
+  <div id="item-status" class="status-msg"></div>
+
+  <div class="sticky-save">
+    <button class="btn btn-primary" id="btn-save-item">Save &amp; Next Item</button>
+    <div class="btn-row" style="margin-top:8px">
+      <button class="btn btn-blue btn-sm" id="btn-save-repeat">Save &amp; Repeat</button>
+      <button class="btn btn-secondary btn-sm" id="btn-save-finish">Save &amp; Finish Bag</button>
+    </div>
+  </div>
+
+  <!-- Edit/delete last item -->
+  <div id="last-item-card" class="card hidden" style="margin-top:14px">
+    <div class="card-title">Last Submitted Item (this device)</div>
+    <div id="last-item-summary" class="review-row" style="margin-bottom:8px"></div>
+    <div class="btn-row">
+      <button class="btn btn-amber btn-sm" id="btn-edit-item">Edit / Resubmit</button>
+      <button class="btn btn-danger btn-sm" id="btn-delete-item">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── WEIGHTS TAB ───────────────────────────────────────── -->
+<div class="tab-panel" id="panel-weights">
+  <div class="weight-context">
+    <div class="wc-label">Current Bag</div>
+    <div class="wc-val" id="wt-bag-label">—</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Plastic Weight (lbs)</div>
+    <div class="field" id="f-plastic-wt">
+      <label>Total weight of plastic items in this bag</label>
+      <input type="number" id="plastic-weight" placeholder="e.g. 0.8" min="0" step="0.01"/>
+      <div class="field-error" id="err-plastic-wt">Enter the plastic weight.</div>
+    </div>
+    <div id="wt-status" class="status-msg"></div>
+    <button class="btn btn-primary" id="btn-confirm-bag">Confirm Bag &amp; Return to Bag Entry</button>
+  </div>
+</div>
+
+<!-- ─── REVIEW TAB ────────────────────────────────────────── -->
+<div class="tab-panel" id="panel-review">
+  <div class="chip-group" style="margin-bottom:12px">
+    <div class="chip selected" id="rv-tab-items" onclick="setReviewMode('items')">Recent Items</div>
+    <div class="chip" id="rv-tab-bags" onclick="setReviewMode('bags')">Recent Bags</div>
+    <div class="chip" id="rv-tab-orphan" onclick="setReviewMode('orphan')">Orphan Check</div>
+  </div>
+
+  <div id="review-status" class="status-msg"></div>
+
+  <button class="btn btn-secondary" id="btn-refresh-review" style="margin-bottom:12px">↻ Refresh from Sheet</button>
+
+  <div id="rv-panel-items"></div>
+  <div id="rv-panel-bags" class="hidden"></div>
+  <div id="rv-panel-orphan" class="hidden"></div>
+
+  <div class="divider"></div>
+  <div class="card">
+    <div class="card-title">Offline Queue</div>
+    <p style="font-size:.83rem;color:var(--text-mid);margin-bottom:10px">
+      Items submitted while offline are queued locally. Opening Review verifies them against the sheet.
+      Queue size: <strong id="queue-size">0</strong>
+    </p>
+    <div id="queue-status" class="status-msg"></div>
+    <button class="btn btn-amber" id="btn-retry-queue">Retry Queue</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Connection Settings</div>
+    <p style="font-size:.83rem;color:var(--text-mid);margin-bottom:10px">
+      The endpoint and token this device uses. Stored on this device only.
+    </p>
+    <div class="conn-settings-row">
+      <button class="btn btn-blue btn-sm" id="btn-edit-conn">Change Settings</button>
+      <button class="btn btn-secondary btn-sm" id="btn-copy-setup-link">Copy Setup Link</button>
+    </div>
+    <div id="conn-current"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Local Backup</div>
+    <p style="font-size:.83rem;color:var(--text-mid);margin-bottom:10px">
+      Download everything stored on this device (queued submissions plus this session's records) as CSV files.
+      Use this as a safety net if the sheet is unreachable in the field.
+    </p>
+    <div class="btn-row">
+      <button class="btn btn-blue btn-sm" id="btn-export-bags">Export Bags CSV</button>
+      <button class="btn btn-blue btn-sm" id="btn-export-items">Export Items CSV</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── GUIDE TAB ─────────────────────────────────────────── -->
+<div class="tab-panel" id="panel-guide">
+  <div class="guide-nav">
+    <a href="#g-principles">Principles</a>
+    <a href="#g-counting">Counting Rules</a>
+    <a href="#g-quantity">Quantity</a>
+    <a href="#g-material">Material</a>
+    <a href="#g-functional">Functional</a>
+    <a href="#g-recyclable">Redeemable</a>
+    <a href="#g-source">Source</a>
+    <a href="#g-brand">Brand</a>
+    <a href="#g-size">Size/Fragment</a>
+    <a href="#g-workflow">Workflow</a>
+  </div>
+
+  <details open id="g-principles">
+    <summary>General Principles</summary>
+    <div class="guide-body">
+      <p>Each item is examined individually. Record its characteristics in the applet, then set it aside and proceed to the next item. This approach lets you capture multiple attributes per item without large-scale physical sorting.</p>
+      <p>Categories cannot anticipate every type of trash found on the highway. Use the Notes field for anything unusual. Large debris that won't fit in bags may be documented separately with descriptive notes.</p>
+      <div class="example">When in doubt, record what you can observe and add a note. An imperfect entry is better than a skipped item.</div>
+    </div>
+  </details>
+
+  <details id="g-counting">
+    <summary>Counting &amp; Unit Rules</summary>
+    <div class="guide-body">
+      <p>These rules keep item counts consistent between sorters and keep the plastic weight accurate.</p>
+      <p><strong>Whole cups count as one unit.</strong> If a cup arrives intact with its lid and/or straw still attached, record the cup, lid, and straw together as a <em>single item</em>. Classify that item by the <strong>material of the cup</strong> — a paper cup with a plastic lid and straw is one Paper/Cardboard item, not three items.</p>
+      <p><strong>But separate them before weighing.</strong> After recording the unit, physically detach the lid and straw and set them with the plastics. They count once toward the cup's material for the item count, and their mass is captured in the bag's plastic weight. The count and the weight are answering two different questions, so they are handled differently on purpose.</p>
+      <div class="example">An intact McDonald's cup with lid and straw → one item, material: Paper/Cardboard, Food/Beverage Container + Takeout Container, brand: McDonald's. Then pull the lid and straw off and put them in the plastics pile before weighing.</div>
+      <p><strong>Loose lids, straws, and caps are their own items.</strong> If you find a lid, straw, bottle cap, or pull tab on its own with no matching container, record it as its own item under Food/Beverage Container → Other Food Packaging, with its own material.</p>
+      <p><strong>Measurements use the longest side.</strong> Every item measurement in this study is the length of the item's <strong>longest side</strong>, measured as found.</p>
+    </div>
+  </details>
+
+  <details id="g-quantity">
+    <summary>Quantity &amp; Presets</summary>
+    <div class="guide-body">
+      <p>Roadside litter contains large numbers of identical small items &mdash; cigarette butts, paper fragments, wood pieces. Recording those one at a time is slow and adds nothing. The <strong>Quantity</strong> field lets one record stand for a whole pile.</p>
+      <p><strong>How to use it.</strong> Sort the pile out of the bag, count it, fill in the form once, set the quantity, and save. A record of 47 cigarette butts is one entry with quantity 47 &mdash; not 47 entries.</p>
+      <p><strong>Split the pile whenever a field would differ.</strong> Quantity applies to items that are alike in every recorded respect. If the butts are a mix of two brands, that is two records. If some paper fragments are large and some small, that is two records. When in doubt, split &mdash; a slightly finer breakdown costs little and cannot be recovered later if lumped together.</p>
+      <p><strong>Size means typical size for the group.</strong> With a quantity above 1, record the size that best represents the pile rather than measuring each piece. If the sizes vary enough that one label misleads, split the record.</p>
+      <p><strong>Brand applies to the whole group.</strong> Only give a brand when every item in the group carries it.</p>
+      <div class="example">38 identical unbranded cigarette butts &rarr; one record: material Other, Smoking Paraphernalia, quantity 38. Then 6 Marlboro butts &rarr; a second record with brand Marlboro, quantity 6.</div>
+      <p><strong>Presets.</strong> Once you have filled in a combination you will use repeatedly, tap <em>Save current form as a preset</em> and name it. Afterwards one tap restores the whole form and you only set the quantity. Presets are stored on the device, not in the sheet, so each volunteer builds their own &mdash; and a shared device keeps them between sessions.</p>
+      <p><strong>Save &amp; Repeat.</strong> Saves the record but leaves the form exactly as it is, for when the next group differs in only one field. Change that field and save again.</p>
+      <p>The item counter in the banner shows <strong>total items</strong>, not number of records, so a bag with one 47-butt record reads 47.</p>
+    </div>
+  </details>
+
+  <details id="g-material">
+    <summary>Material Categories</summary>
+    <div class="guide-body">
+      <p>Material categories are <strong>mutually exclusive</strong>. Assign the primary material by volume. The first four categories (Paper/Cardboard, Plastic, Glass, Metal) correspond roughly to the 2022 statewide study and enable direct comparison.</p>
+      <ul>
+        <li><strong>Paper/Cardboard:</strong> Paper packaging, cardboard, napkins, paper cups, receipts. A paper cup with a thin plastic lining is still Paper/Cardboard — the plastic lining is not the primary material by volume.</li>
+        <li><strong>Plastic:</strong> Bottles, containers, wrappers, bags, foam products. Foam is Plastic.</li>
+        <li><strong>Glass:</strong> Bottles, fragments, and other glass materials. Fragments are Glass.</li>
+        <li><strong>Metal:</strong> Aluminum cans, metal containers, other metallic debris.</li>
+        <li><strong>Wood:</strong> Wood scraps, lumber pieces, pallet fragments.</li>
+        <li><strong>Textile:</strong> Fabrics and clothing, including technical exercise gear made primarily of synthetic plastic fibers — classify by the item's function (clothing/textile), not by the polymer content.</li>
+        <li><strong>Other:</strong> Genuinely mixed-material or unidentifiable items that do not clearly fit another category. Use sparingly.</li>
+      </ul>
+      <div class="example">A mylar balloon: the primary material is plastic film → Plastic. A paper bag with staples → Paper/Cardboard. A tire fragment → Other (rubber), or use the Automotive Debris functional category to flag it.</div>
+    </div>
+  </details>
+
+  <details id="g-functional">
+    <summary>Functional Categories</summary>
+    <div class="guide-body">
+      <p>Functional categories are <strong>overlapping</strong> — an item can belong to multiple categories simultaneously. Select all that apply.</p>
+      <ul>
+        <li><strong>Food/Beverage Container:</strong> Anything that held, wrapped, or served food or drink. Use sub-options to specify further.
+          <ul>
+            <li><strong>Takeout Container:</strong> Any container from a takeout or fast-food meal. <strong>Utensils belong here</strong> — forks, knives, sporks, chopsticks, and stir sticks are all recorded as Takeout Container.</li>
+            <li><strong>Beverage Container:</strong> Any container for a beverage.
+              <ul>
+                <li><strong>Alcoholic:</strong> Beer cans, liquor bottles, wine bottles, hard seltzer cans, and other alcohol packaging.</li>
+                <li><strong>Redeemable (Bottle Bill):</strong> Cans and bottles that carry an Oregon deposit. See the Redeemable section below for the exact test.</li>
+              </ul>
+            </li>
+            <li><strong>Other Food Packaging:</strong> The catch-all for food-related items that are not a takeout or beverage container — food wrappers, bottle caps, cup lids, pull tabs, and straws.</li>
+          </ul>
+        </li>
+        <li><strong>Commercial Paperwork &amp; Tags:</strong> Paper and tag waste originating from commercial transport and freight. A key category for hauler accountability.
+          <ul>
+            <li><strong>Lumber Tags:</strong> Identification tags that detach from lumber loads and blow onto the road, even from properly secured loads.</li>
+            <li><strong>Paperwork:</strong> Bills of lading, manifests, invoices, delivery slips, packing lists, inspection forms.</li>
+            <li><strong>Other Tags &amp; Labels:</strong> Shipping labels, barcode stickers, pallet placards, and any commercial tag that is not a lumber tag.</li>
+          </ul>
+        </li>
+        <li><strong>Fasteners, Packaging &amp; Wrappers:</strong> <strong>Non-food</strong> wrapping, containment, and fastening material — plastic banding and strapping, shrink and pallet wrap, bubble wrap, zip ties, twine, tape, cardboard box fragments, foam packing blocks.
+          <ul>
+            <li><strong>Commercial:</strong> Clearly from freight or industrial packaging — heavy banding, pallet wrap, bulk strapping.</li>
+            <li><strong>Non-commercial:</strong> Consumer-scale packaging — a torn Amazon mailer, retail blister packaging, a bread tie.</li>
+            <li><strong>Unknown:</strong> Cannot tell. Use freely.</li>
+          </ul>
+        </li>
+        <li><strong>Advertising &amp; Promotion:</strong> Flyers, door hangers, brochures, coupon mailers, yard-sign fragments, promotional handouts, business cards, campaign material.</li>
+        <li><strong>Toxic Fluid Container:</strong> Antifreeze, motor oil, weedkiller, and similar containers. Even empty containers count.</li>
+        <li><strong>Automotive Debris:</strong> Vehicle parts, tire fragments, bumper pieces, and related materials.</li>
+        <li><strong>Construction/Demolition Debris:</strong> Wood scraps, drywall, insulation, nails, concrete, cement.</li>
+        <li><strong>Lawn/Garden Care:</strong> Lawn tools, fertilizer bags, pesticide containers, mulch packaging.</li>
+        <li><strong>Marina-Related:</strong> Anything originating from or associated with the Washougal marina — rope, netting, buoys, boat parts.</li>
+        <li><strong>Smoking Paraphernalia:</strong> Cigarette butts, vape waste, vape cartridges, lighters, cigarette packaging.</li>
+        <li><strong>Attire:</strong> Clothing, gloves, shoes, hats, PPE items.</li>
+        <li><strong>Furniture:</strong> Chairs, cushions, furniture fragments.</li>
+        <li><strong>Other:</strong> Items that do not fit any category above. Add a note describing what it is so the category list can be improved.</li>
+      </ul>
+
+      <p><strong>Food wrappers vs. packaging — the deciding rule:</strong> if it held or wrapped <em>food or drink</em>, it goes under Food/Beverage Container → Other Food Packaging. If it wrapped, bundled, or fastened <em>anything else</em>, it goes under Fasteners, Packaging &amp; Wrappers. A candy bar wrapper is food packaging. The shrink wrap around a case of candy bars is Fasteners/Packaging.</p>
+
+      <div class="example">A beer can → Food/Beverage Container + Beverage Container + Alcoholic + Redeemable. A vape pen → Smoking Paraphernalia. A lumber tag → Commercial Paperwork &amp; Tags + Lumber Tags. A strip of plastic banding off a freight pallet → Fasteners, Packaging &amp; Wrappers + Commercial. A crushed bottle cap → Food/Beverage Container + Other Food Packaging.</div>
+    </div>
+  </details>
+
+  <details id="g-recyclable">
+    <summary>Redeemable — Bottle Bill Definition</summary>
+    <div class="guide-body">
+      <p>"Redeemable" is <strong>not</strong> a judgment about whether something looks recyclable or carries a recycling symbol. It means the container carries a deposit under the <strong>Oregon Bottle Bill</strong>. Use this legal definition, not your own assessment.</p>
+      <p><strong>Only cans and bottles qualify.</strong> Cartons, pouches, boxes, and cups are never marked Redeemable in this study, even if the beverage inside would otherwise be covered.</p>
+      <p>The test has three parts — all must be true:</p>
+      <ul>
+        <li><strong>Form:</strong> a can or bottle made of metal, glass, or plastic.</li>
+        <li><strong>Size:</strong> between 4 ounces and 1.5 liters.</li>
+        <li><strong>Contents:</strong> a drinkable beverage that is not on the excluded list.</li>
+      </ul>
+      <p><strong>Excluded beverages:</strong> distilled spirits; wine, unless it is in a can; infant formula; liquid meal replacements; and anything listing dairy milk or a plant-based milk as the first ingredient.</p>
+      <p>Everything else pourable is generally covered — water, soda and other carbonated drinks, beer and malt beverages, hard seltzer, kombucha, juice, tea, coffee drinks, sports drinks, and energy drinks.</p>
+      <div class="example">A 12 oz aluminum energy drink can → Redeemable. A 2-liter soda bottle → too large, not Redeemable. A wine bottle → excluded (wine only counts in a can). A milk jug → excluded. A juice box → not a can or bottle, so not Redeemable. A 16 oz plastic water bottle → Redeemable.</div>
+      <p>When you cannot determine the size or contents of a badly degraded container, leave Redeemable unchecked and add a note.</p>
+    </div>
+  </details>
+
+  <details id="g-source">
+    <summary>Likely Source</summary>
+    <div class="guide-body">
+      <p>Likely source is a <strong>judgment call</strong> made by the sorter. This field is optional, and <strong>Unknown is a fully correct and acceptable answer</strong> — do not feel pressured to guess.</p>
+      <ul>
+        <li><strong>Intentional Litter:</strong> Items believed to have been deliberately discarded from a vehicle or by a pedestrian. Fast-food packaging, cigarette butts, and single-use drink containers are common examples.</li>
+        <li><strong>Unsecured Loads:</strong> Materials believed to have fallen or blown from vehicle loads that were not properly secured. Construction debris, loose household items.</li>
+        <li><strong>Commercial Haulers:</strong> Items that blew off secured commercial loads. Lumber tags are the archetypal example — they detach and blow off even from loads that appear properly secured. Plastic banding, packing film, and cardboard from pallets are other examples.</li>
+        <li><strong>Unknown:</strong> Cannot determine the source with any reasonable confidence. Use freely — it is better to record Unknown than to record a guess as a fact.</li>
+      </ul>
+      <div class="example">"Unknown" is a data point, not a failure. The statewide study assigned likely source at the category level; we assign it per item, which means more unknowns are expected and appropriate.</div>
+    </div>
+  </details>
+
+  <details id="g-brand">
+    <summary>Brand Information</summary>
+    <div class="guide-body">
+      <p>Brand data helps assess corporate responsibility for highway pollution and is a key goal of this study. Record any identifiable brand — search the dropdown or type a brand name.</p>
+      <p><strong>Beverages are recorded by type, not by brand.</strong> For water, soda, energy drinks, sports drinks, beer, and other beverages, select the generic "(all brands)" entry rather than the specific label. These categories are tracked at the beverage-type level, so a Coke can and a Pepsi can are both recorded as <em>Soda (all brands)</em>.</p>
+      <ul>
+        <li><strong>Water (all brands)</strong> — bottled still or sparkling water</li>
+        <li><strong>Soda (all brands)</strong> — carbonated soft drinks</li>
+        <li><strong>Energy drink (all brands)</strong></li>
+        <li><strong>Sports drink (all brands)</strong> — electrolyte and hydration drinks</li>
+        <li><strong>Other non-alcoholic beverage (all brands)</strong> — juice, tea, coffee drinks, kombucha, milk</li>
+        <li><strong>Beer (all brands)</strong> — beer and malt beverages</li>
+        <li><strong>Other alcoholic beverage (all brands)</strong> — wine, liquor, cider, and unnamed ready-to-drink cocktails</li>
+      </ul>
+      <p><strong>Named brands are still recorded</strong> for food and retail outlets, tobacco and vape products, and specific ready-to-drink alcohol brands the study tracks individually (Buzz Balls, Sipzz, White Claw, Truly).</p>
+      <p>Add new brands as you encounter them by typing directly into the brand field. Brand attribution is ad-hoc and cumulative: ECCA will have complete freedom to document any brand encountered.</p>
+      <div class="example">A crushed Modelo can → brand: Beer (all brands). A Buzz Balls container → brand: Buzz Balls. A faded fast-food cup where you can still read "McDonald's" → brand: McDonald's. A generic plastic bag with no markings → leave brand blank.</div>
+      <p>Only record a brand when you can confidently identify it. Degraded or ambiguous branding should be left blank rather than guessed.</p>
+    </div>
+  </details>
+
+  <details id="g-size">
+    <summary>Size &amp; Fragmentation</summary>
+    <div class="guide-body">
+      <p><strong>Size</strong> is measured along the item's <strong>longest side</strong>, as found. This applies to every item measurement in the study. Measure it as you find it — do not estimate what it would have been before it was broken or degraded.</p>
+      <p>For an irregular or crumpled item, measure the greatest straight-line distance between any two points on the item in its current state. Do not flatten or unfold it first.</p>
+      <ul>
+        <li><strong>Small:</strong> Less than 3 inches (roughly a cigarette butt, a bottle cap)</li>
+        <li><strong>Medium:</strong> 3–6 inches (a standard soda can, a candy wrapper)</li>
+        <li><strong>Large:</strong> 6 inches – 2 feet (a plastic bottle, a newspaper, a paper bag)</li>
+        <li><strong>Very Large:</strong> Greater than 2 feet (a tire, a large piece of cardboard, furniture)</li>
+      </ul>
+      <p><strong>Fragment:</strong> Mark this if the item is clearly a piece of a larger broken item — scattered plastic shards, broken glass, torn sections of a bag. The fragment itself is measured as found, not reconstructed.</p>
+      <div class="example">A plastic bottle cap: Small. Half of a glass bottle: Medium or Large depending on actual size — measure the fragment, not the original bottle. A tire fragment: depends on actual size of fragment found.</div>
+    </div>
+  </details>
+
+  <details id="g-workflow">
+    <summary>Workflow Overview</summary>
+    <div class="guide-body">
+      <p>The applet is organized around a three-stage workflow for each bag:</p>
+      <ul>
+        <li><strong>1. Bag tab:</strong> Enter transect ID, bag number, bag weight, and optionally your name and field notes. Save the bag record — this creates an active bag and takes you to the Items tab.</li>
+        <li><strong>2. Items tab:</strong> Enter items one group at a time &mdash; use <strong>Quantity</strong> for piles of identical items rather than repeating the form. Press <strong>Save &amp; Next Item</strong> to record it and immediately get a blank form for the next item — this is the button you'll use for almost every item. When you reach the last item in the bag, press <strong>Save &amp; Finish Bag</strong> instead, which records it and takes you straight to the Plastic Weight tab. The banner at the top shows a running count of items recorded for the current bag.</li>
+        <li><strong>3. Plastic Weight tab:</strong> After all items in the bag are entered, record the plastic weight and press Confirm Bag. This marks all items as confirmed and returns you to the Bag tab for the next bag.</li>
+      </ul>
+      <p>You cannot access the Items or Plastic Weight tabs without an active bag. The Review tab lets you return to any previous bag to edit items or re-confirm weights, and includes a Local Backup section for exporting this device's records as CSV if the sheet is unreachable.</p>
+      <div class="example">If you realize mid-way through a bag that you entered the wrong bag number, go to the Bag tab and change the bag number — the app will offer to update all items already recorded for that bag.</div>
+    </div>
+  </details>
+</div>
+
+</main>
+
+<!-- ══ MODALS ══════════════════════════════════════════════ -->
+
+<!-- Bag workflow interruption -->
+<div class="modal-overlay" id="modal-bag-interrupt">
+  <div class="modal-box">
+    <h3>Bag Not Yet Confirmed</h3>
+    <p>You have an active bag that hasn't been confirmed through the Weights tab yet. What would you like to do?</p>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" id="modal-change-bag-info">Change Current Bag Info</button>
+      <button class="btn btn-amber" id="modal-new-bag">Start New Bag</button>
+      <button class="btn btn-primary" id="modal-cancel-interrupt">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- No active bag -->
+<div class="modal-overlay" id="modal-no-bag">
+  <div class="modal-box">
+    <h3>No Active Bag</h3>
+    <p>You need to save a bag record on the Bag tab before you can enter items or weights.</p>
+    <div class="modal-btns">
+      <button class="btn btn-primary" id="modal-no-bag-ok">Go to Bag Tab</button>
+    </div>
+  </div>
+</div>
+
+<!-- Retry queue confirm -->
+<div class="modal-overlay" id="modal-retry">
+  <div class="modal-box">
+    <h3>Retry Queue</h3>
+    <p>Retrying the queue may create duplicate rows if previous submissions actually succeeded but weren't confirmed. Only retry if you're sure items are missing from the sheet. Continue?</p>
+    <div class="modal-btns">
+      <button class="btn btn-amber" id="modal-retry-yes">Yes, retry</button>
+      <button class="btn btn-primary" id="modal-retry-no">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete confirm -->
+<div class="modal-overlay" id="modal-delete-confirm">
+  <div class="modal-box">
+    <h3>Delete Record</h3>
+    <p id="modal-delete-msg">Are you sure you want to delete this record from the sheet? This cannot be undone.</p>
+    <div class="modal-btns">
+      <button class="btn btn-danger" id="modal-delete-yes">Delete</button>
+      <button class="btn btn-primary" id="modal-delete-no">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Name a preset -->
+<div class="modal-overlay" id="modal-preset-name">
+  <div class="modal-box">
+    <h3>Save Preset</h3>
+    <p>Give this combination a short name you'll recognise in the field.</p>
+    <div class="field">
+      <input type="text" id="preset-name-input" placeholder="e.g. Cigarette butt" maxlength="40" autocomplete="off">
+    </div>
+    <p id="preset-name-err" class="field-error" style="display:none">Enter a name.</p>
+    <p id="preset-name-summary" style="font-size:.78rem;color:var(--text-mid)"></p>
+    <div class="modal-btns">
+      <button class="btn btn-primary" id="modal-preset-save">Save Preset</button>
+      <button class="btn btn-secondary" id="modal-preset-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- First-run setup / connection settings -->
+<div id="setup-overlay" class="hidden">
+  <div class="setup-banner">
+    <h1>ECCA Litter Study</h1>
+    <div class="sub">Roadside Litter Categorization Applet</div>
+  </div>
+
+  <div class="setup-box">
+    <h2 id="setup-title">Connect This Device</h2>
+    <p id="setup-intro">Enter the connection details for your study's Google Sheet. This is a one-time step on this device &mdash; the details are saved here and never sent anywhere except your own sheet.</p>
+
+    <label class="setup-label" for="setup-url">Web App URL</label>
+    <input type="url" id="setup-url" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off" spellcheck="false" autocapitalize="off"/>
+    <div class="setup-hint">The published Apps Script address. It ends in <strong>/exec</strong>.</div>
+    <div class="field-error" id="setup-url-err" style="display:none;margin-top:6px">Enter the /exec URL of your Apps Script web app.</div>
+
+    <label class="setup-label" for="setup-token">Access Token</label>
+    <input type="text" id="setup-token" placeholder="Paste your token" autocomplete="off" spellcheck="false" autocapitalize="off"/>
+    <div class="setup-hint">Leave blank if your study does not use a token.</div>
+
+    <div id="setup-status" class="status-msg"></div>
+
+    <div class="btn-row" style="margin-top:18px">
+      <button class="btn btn-primary" id="setup-save">Test &amp; Save</button>
+      <button class="btn btn-secondary hidden" id="setup-cancel">Cancel</button>
+    </div>
+    <button type="button" id="setup-skip" class="setup-link">Save without testing</button>
+
+    <p class="setup-foot">Don't have these details? Ask whoever set up the study &mdash; they can send you a setup link that fills both fields in automatically.</p>
+  </div>
+</div>
+
+<!-- Connection diagnostics -->
+<div class="modal-overlay" id="modal-conn-detail">
+  <div class="modal-box">
+    <h3>Connection Problem</h3>
+    <p id="conn-detail-msg"></p>
+    <p style="font-size:.75rem;color:var(--text-light);word-break:break-all;background:var(--green-pale);padding:8px;border-radius:6px">
+      Endpoint in use:<br><span id="conn-detail-url"></span>
+    </p>
+    <p style="font-size:.8rem">Records you save are still stored on this device and will be sent once the connection works. Nothing is lost.</p>
+    <div class="modal-btns">
+      <button class="btn btn-primary" id="modal-conn-retest">Test Again</button>
+      <button class="btn btn-secondary" id="modal-conn-close">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Duplicate bag warning -->
+<div class="modal-overlay" id="modal-duplicate-bag">
+  <div class="modal-box">
+    <h3>Bag Already Recorded</h3>
+    <p id="modal-duplicate-msg"></p>
+    <div class="modal-btns">
+      <button class="btn btn-amber" id="modal-dup-continue">Save Anyway</button>
+      <button class="btn btn-primary" id="modal-dup-cancel">Cancel — Let Me Fix It</button>
+    </div>
+  </div>
+</div>
+
+<!-- Resume bag from review -->
+<div class="modal-overlay" id="modal-resume-bag">
+  <div class="modal-box">
+    <h3>Resume Bag</h3>
+    <p id="modal-resume-msg"></p>
+    <div class="modal-btns">
+      <button class="btn btn-primary" id="modal-resume-yes">Resume This Bag</button>
+      <button class="btn btn-secondary" id="modal-resume-no">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// CONFIGURATION
+// ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// CONNECTION SETTINGS
+// ══════════════════════════════════════════════════════════════
+// These are deliberately EMPTY. The endpoint and token are entered once per
+// device and kept in that device's local storage, so this file contains no
+// credential and is safe to host publicly, commit to a public repository or
+// email. Rotating the token therefore never requires rebuilding this file.
+//
+// Resolution order: URL fragment (#u=…&t=…)  >  this device's saved settings
+// > the defaults below. Filling the defaults in re-embeds the secret, so
+// leave them blank unless you specifically want that.
+const SCRIPT_URL_DEFAULT   = '';
+const SCRIPT_TOKEN_DEFAULT = '';
+
+let SCRIPT_URL   = '';
+let SCRIPT_TOKEN = '';
+
+// Shared secret — must match the ECCA_TOKEN script property in Apps Script.
+// Run generateToken() in the Apps Script editor to create one, then paste here.
+// NOTE: this token ships inside this file. It is a revocable access key, not
+// a password — anyone who obtains this file has it. See the security section
+// of GOOGLE_SHEETS_SETUP.md for what it does and does not protect against.
+
+// ══════════════════════════════════════════════════════════════
+// BRAND LIST
+// ══════════════════════════════════════════════════════════════
+const BRAND_GROUPS = [
+  { group:'Beverages — by type', items:[
+      'Water (all brands)',
+      'Soda (all brands)',
+      'Energy drink (all brands)',
+      'Sports drink (all brands)',
+      'Other non-alcoholic beverage (all brands)',
+      'Beer (all brands)',
+      'Other alcoholic beverage (all brands)'
+  ]},
+  { group:'Alcohol — named brands', items:[
+      'Buzz Balls','Sipzz','White Claw','Truly'
+  ]},
+  { group:'Food & retail', items:[
+      'McDonald\'s','Burger King','Taco Bell','Wendy\'s','Subway',
+      'Starbucks','Burgerville','KFC'
+  ]},
+  { group:'Tobacco & vape', items:[
+      'Marlboro','Newport','Camel','JUUL','Vuse'
+  ]},
+  { group:'Other', items:['Other'] }
+];
+
+// Flat list for filtering/lookup
+const BRANDS = BRAND_GROUPS.reduce((acc,g)=>acc.concat(g.items),[]);
+
+// Recently-used brands (most recent first), persisted locally
+let recentBrands = [];
+const MAX_RECENT = 6;
+
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+let activeBag = null;          // { transect_id, bag_number, classifier_name }
+let lastBag   = null;          // { timestamp, data }
+let lastItem  = null;          // { timestamp, data }
+let queue     = [];            // offline queue
+let reviewData= { bags:[], items:[] };
+let reviewMode= 'items';
+let selectedBrand = '';
+let brandDropdownOpen = false;
+
+let bagItemCount = 0;          // items recorded for the current active bag
+let sessionBags  = [];         // local backup of bags written from this device
+let sessionItems = [];         // local backup of items written from this device
+let presets      = [];         // saved item-form profiles (this device only)
+
+// ══════════════════════════════════════════════════════════════
+// CONNECTION CONFIG
+// ══════════════════════════════════════════════════════════════
+// Credentials live on the device, not in this file. Resolution order:
+//   1. URL fragment  (#u=<endpoint>&t=<token>)  — a one-tap setup link.
+//      The fragment is never sent to any server, and is stripped from the
+//      address bar immediately after it is read.
+//   2. This device's saved settings.
+//   3. The blank defaults at the top of this script.
+function readFragmentConfig(){
+  const raw = (location.hash || '').replace(/^#/, '');
+  if(!raw) return null;
+  const out = {};
+  raw.split('&').forEach(pair=>{
+    const i = pair.indexOf('=');
+    if(i < 1) return;
+    const k = pair.slice(0,i), v = decodeURIComponent(pair.slice(i+1).replace(/\+/g,' '));
+    if(k === 'u' || k === 'url')   out.url = v;
+    if(k === 't' || k === 'token') out.token = v;
+  });
+  if(!out.url && !out.token) return null;
+  return out;
+}
+
+function clearFragment(){
+  try{
+    history.replaceState(null, '', location.pathname + location.search);
+  }catch(e){ location.hash = ''; }
+}
+
+function isValidEndpoint(u){
+  return /^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec/.test(String(u||'').trim());
+}
+
+function loadConfig(){
+  let url = '', token = '';
+  try { url   = store.get('ecca_url')   || ''; } catch(e){}
+  try { token = store.get('ecca_token') || ''; } catch(e){}
+
+  const frag = readFragmentConfig();
+  if(frag){
+    if(frag.url)   url   = frag.url;
+    if(frag.token !== undefined) token = frag.token;
+    clearFragment();
+    if(url){ store.set('ecca_url', url); store.set('ecca_token', token); }
+  }
+
+  SCRIPT_URL   = url   || SCRIPT_URL_DEFAULT;
+  SCRIPT_TOKEN = token || SCRIPT_TOKEN_DEFAULT;
+  return !!SCRIPT_URL;
+}
+
+function saveConfig(url, token){
+  SCRIPT_URL   = String(url||'').trim();
+  SCRIPT_TOKEN = String(token||'').trim();
+  store.set('ecca_url',   SCRIPT_URL);
+  store.set('ecca_token', SCRIPT_TOKEN);
+}
+
+// ══════════════════════════════════════════════════════════════
+// SETUP SCREEN
+// ══════════════════════════════════════════════════════════════
+let setupIsFirstRun = true;
+
+function openSetup(firstRun){
+  setupIsFirstRun = !!firstRun;
+  $('setup-url').value   = SCRIPT_URL;
+  $('setup-token').value = SCRIPT_TOKEN;
+  $('setup-url-err').style.display = 'none';
+  hideStatus($('setup-status'));
+  $('setup-title').textContent = firstRun ? 'Connect This Device' : 'Connection Settings';
+  $('setup-intro').textContent = firstRun
+    ? "Enter the connection details for your study's Google Sheet. You only need to do this once on this device — they are saved here and never sent anywhere except your own sheet."
+    : 'Change the endpoint or token this device uses. Saved on this device only.';
+  $('setup-cancel').classList.toggle('hidden', !!firstRun);
+  $('setup-overlay').classList.remove('hidden');
+  if(firstRun) document.body.classList.add('setup-open');
+  window.scrollTo(0,0);
+}
+
+function closeSetup(){
+  $('setup-overlay').classList.add('hidden');
+  document.body.classList.remove('setup-open');
+}
+
+// Verify the settings actually work before committing to them
+async function testConfig(url, token){
+  const target = url + (url.indexOf('?')===-1?'?':'&') + (token ? 'token='+encodeURIComponent(token) : '');
+  try{
+    const res  = await fetch(target);
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); }
+    catch(e){
+      return { ok:false, msg:'The endpoint replied, but not with data. Check that the deployment is published with "Who has access: Anyone".' };
+    }
+    if(data && data.ok) return { ok:true, msg:'Connected. Found '+((data.bags||[]).length)+' bags and '+((data.items||[]).length)+' items.' };
+    if(data && /unauthorized/i.test(String(data.error||'')))
+      return { ok:false, msg:'The endpoint is reachable but rejected this token. Check the token for stray spaces.' };
+    return { ok:false, msg:'The script replied with an error: ' + ((data && data.error) || 'unknown') };
+  }catch(e){
+    return { ok:false, msg:'Could not reach the endpoint. Check the URL and your connection.' };
+  }
+}
+
+function initSetup(){
+  $('setup-save').addEventListener('click', async ()=>{
+    const url = $('setup-url').value.trim();
+    const token = $('setup-token').value.trim();
+    if(!isValidEndpoint(url)){ $('setup-url-err').style.display='block'; return; }
+    $('setup-url-err').style.display='none';
+
+    $('setup-save').disabled = true;
+    showStatus($('setup-status'),'Testing…','info');
+    const res = await testConfig(url, token);
+    $('setup-save').disabled = false;
+
+    if(!res.ok){ showStatus($('setup-status'), res.msg, 'error'); return; }
+    showStatus($('setup-status'), res.msg, 'success');
+    saveConfig(url, token);
+    setTimeout(()=>{
+      closeSetup();
+      if(setupIsFirstRun) startApp();
+      else { setConnState(true); renderConnCurrent(); }
+    }, 700);
+  });
+
+  // Escape hatch for a volunteer with no signal at setup time
+  $('setup-skip').addEventListener('click', ()=>{
+    const url = $('setup-url').value.trim();
+    if(!isValidEndpoint(url)){ $('setup-url-err').style.display='block'; return; }
+    saveConfig(url, $('setup-token').value.trim());
+    closeSetup();
+    if(setupIsFirstRun) startApp(); else renderConnCurrent();
+  });
+
+  $('setup-cancel').addEventListener('click', closeSetup);
+}
+
+function renderConnCurrent(){
+  const el = $('conn-current');
+  if(!el) return;
+  const short = SCRIPT_URL ? SCRIPT_URL.replace(/^https:\/\/script\.google\.com\/macros\/s\//,'…/').slice(0,52)+'…' : '(not set)';
+  el.textContent = 'Endpoint: ' + short + '  ·  Token: ' + (SCRIPT_TOKEN ? 'set' : 'none');
+}
+
+function initConnSettings(){
+  const edit = $('btn-edit-conn');
+  if(edit) edit.addEventListener('click', ()=>openSetup(false));
+
+  const copy = $('btn-copy-setup-link');
+  if(copy) copy.addEventListener('click', ()=>{
+    const link = location.origin + location.pathname +
+      '#u=' + encodeURIComponent(SCRIPT_URL) +
+      (SCRIPT_TOKEN ? '&t=' + encodeURIComponent(SCRIPT_TOKEN) : '');
+    const done = ()=>{
+      showStatus($('queue-status'),'Setup link copied. Send it only to people who should have access — it contains the token.','success');
+      setTimeout(()=>hideStatus($('queue-status')), 5000);
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(link).then(done).catch(()=>{
+        showStatus($('queue-status'), link, 'info');
+      });
+    } else {
+      showStatus($('queue-status'), link, 'info');
+    }
+  });
+  renderConnCurrent();
+}
+
+// ── Storage guard ─────────────────────────────────────────────
+// localStorage is not always writable. Safari throws QuotaExceededError in
+// Private Browsing and when device storage is full, and SecurityError for
+// pages loaded from file://. An unguarded setItem throw propagates out of
+// LS.save(), which is called BEFORE the network request in submitWithQueue —
+// so a single throw silently aborts the whole save and the app appears to do
+// nothing. Everything below degrades to an in-memory copy instead of throwing.
+let storageAvailable = true;
+const memStore = {};
+
+const store = {
+  get(k){
+    if(storageAvailable){
+      try { return localStorage.getItem(k); }
+      catch(e){ storageAvailable = false; }
+    }
+    return (k in memStore) ? memStore[k] : null;
+  },
+  set(k,v){
+    memStore[k] = v;                    // in-memory copy always kept
+    if(!storageAvailable) return false;
+    try { localStorage.setItem(k,v); return true; }
+    catch(e){
+      storageAvailable = false;
+      console.warn('ECCA: local storage unavailable (' + (e.name||'Error') +
+        '). Continuing in memory — records still send to the sheet, but ' +
+        'anything queued while offline will not survive closing the app.');
+      return false;
+    }
+  }
+};
+
+const LS = {
+  save() {
+    // Never throws.
+    store.set('ecca_active',   JSON.stringify(activeBag));
+    store.set('ecca_lastBag',  JSON.stringify(lastBag));
+    store.set('ecca_lastItem', JSON.stringify(lastItem));
+    store.set('ecca_queue',    JSON.stringify(queue));
+    store.set('ecca_recent',   JSON.stringify(recentBrands));
+    store.set('ecca_bagCount', JSON.stringify(bagItemCount));
+    store.set('ecca_sessBags', JSON.stringify(sessionBags));
+    store.set('ecca_sessItems',JSON.stringify(sessionItems));
+    store.set('ecca_presets',  JSON.stringify(presets));
+  },
+  load() {
+    try { activeBag = JSON.parse(store.get('ecca_active')) || null; } catch(e){}
+    try { lastBag   = JSON.parse(store.get('ecca_lastBag'))  || null; } catch(e){}
+    try { lastItem  = JSON.parse(store.get('ecca_lastItem')) || null; } catch(e){}
+    try { queue     = JSON.parse(store.get('ecca_queue'))    || []; } catch(e){}
+    try { recentBrands = JSON.parse(store.get('ecca_recent')) || []; } catch(e){}
+    try { bagItemCount = JSON.parse(store.get('ecca_bagCount')) || 0; } catch(e){}
+    try { sessionBags  = JSON.parse(store.get('ecca_sessBags'))  || []; } catch(e){}
+    try { sessionItems = JSON.parse(store.get('ecca_sessItems')) || []; } catch(e){}
+    try { presets      = JSON.parse(store.get('ecca_presets'))   || []; } catch(e){}
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
+// UTILITIES
+// ══════════════════════════════════════════════════════════════
+function $(id){ return document.getElementById(id); }
+function now(){ return new Date().toISOString(); }
+
+// Escape text destined for an HTML attribute or body — transect IDs and notes
+// are free text and may contain quotes or angle brackets.
+function isTrue(v){
+  // Sheets may hand back a boolean OR the string "TRUE"/"FALSE". The string
+  // "FALSE" is truthy in JS, so a raw check would label unconfirmed rows green.
+  return v === true || v === 1 || /^(true|yes)$/i.test(String(v).trim());
+}
+
+function esc(s){
+  return String(s==null?'':s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function fmtDate(iso){ try{ return new Date(iso).toLocaleString(); }catch(e){return iso;} }
+
+function showStatus(el, msg, type='info'){
+  el.textContent = msg;
+  el.className = 'status-msg show ' + type;
+}
+function hideStatus(el){ el.className = 'status-msg'; }
+
+function fieldError(fieldEl, errEl, show){
+  if(show){
+    fieldEl.classList.add('has-error');
+    errEl.style.display = 'block';
+  } else {
+    fieldEl.classList.remove('has-error');
+    errEl.style.display = 'none';
+  }
+}
+
+function openModal(id){ $(id).classList.add('open'); }
+function closeModal(id){ $(id).classList.remove('open'); }
+function closeAllModals(){
+  document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('open'));
+}
+
+// ══════════════════════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════════════════════
+const TAB_NAMES = ['bag','items','weights','review','guide'];
+function switchTab(name){
+  // Access control
+  if((name==='items'||name==='weights') && !activeBag){
+    openModal('modal-no-bag');
+    return;
+  }
+  TAB_NAMES.forEach(t=>{
+    document.querySelector(`[data-tab="${t}"]`).classList.toggle('active', t===name);
+    $(`panel-${t}`).classList.toggle('active', t===name);
+  });
+  const banner = $('ctx-banner');
+  if(name==='items'||name==='weights'){
+    banner.classList.remove('hidden');
+    updateCtxBanner();
+  } else {
+    banner.classList.add('hidden');
+  }
+  if(name==='items') renderLastItemCard();
+  if(name==='review') loadReview();
+  if(name==='weights') updateWeightsTab();
+}
+
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click',()=>switchTab(btn.dataset.tab));
+});
+
+$('modal-no-bag-ok').addEventListener('click',()=>{ closeModal('modal-no-bag'); switchTab('bag'); });
+
+function updateCtxBanner(){
+  if(!activeBag){ $('ctx-banner').classList.add('hidden'); return; }
+  $('ctx-tid').textContent = activeBag.transect_id;
+  $('ctx-bag').textContent = activeBag.bag_number;
+  $('ctx-item-count').textContent = bagItemCount + (bagItemCount===1 ? ' item' : ' items');
+}
+
+// ══════════════════════════════════════════════════════════════
+// CHIP BUTTONS — single-select groups
+// ══════════════════════════════════════════════════════════════
+function initChipGroups(){
+  document.querySelectorAll('.chip-group').forEach(group=>{
+    const multi = group.dataset.multi !== 'false'; // default allow multi
+    // Only attach to chips that are NOT toggle-chips — those have their own listeners
+    group.querySelectorAll('.chip:not(.toggle-chip)').forEach(chip=>{
+      chip.addEventListener('click',()=>{
+        if(!multi){
+          group.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));
+        }
+        chip.classList.toggle('selected');
+        // Clear error if any
+        const errId = 'err-' + group.dataset.field;
+        const errEl = $(errId);
+        if(errEl && chip.classList.contains('selected')) errEl.style.display='none';
+      });
+    });
+  });
+}
+
+// All sub-group container ids, used when clearing/resetting the form
+const SUB_GROUP_IDS = ['sub-food','sub-beverage','sub-paperwork','sub-fasteners'];
+
+// Toggle chips — data-driven parent/child handling.
+// A chip with data-sub="<id>" is a parent: selecting it reveals that sub-group,
+// deselecting it hides the sub-group and clears every chip nested inside it
+// (recursively, so deselecting Food/Beverage Container also clears the Beverage sub-chips).
+function initToggleChips(){
+  document.querySelectorAll('#panel-items .toggle-chip').forEach(chip=>{
+    chip.addEventListener('click',()=>{
+      chip.classList.toggle('selected');
+      const subId = chip.dataset.sub;
+      if(!subId) return;
+      const sub = $(subId);
+      if(!sub) return;
+      const on = chip.classList.contains('selected');
+      sub.classList.toggle('hidden',!on);
+      if(!on) clearSubGroup(sub);
+    });
+  });
+}
+
+// Deselect every chip inside a sub-group and collapse any nested sub-groups
+function clearSubGroup(sub){
+  sub.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));
+  sub.querySelectorAll('.sub-group').forEach(s=>s.classList.add('hidden'));
+}
+
+function getChipValue(groupId){
+  const group = $(groupId);
+  if(!group) return '';
+  const sel = group.querySelector('.chip.selected');
+  return sel ? sel.dataset.value : '';
+}
+
+// ══════════════════════════════════════════════════════════════
+// QUANTITY
+// ══════════════════════════════════════════════════════════════
+const MAX_QTY = 9999;
+
+// Quantity of a stored row. Rows written before this feature have no
+// quantity value, so they count as 1 — never 0.
+function itemQty(row){
+  const n = Number(row && row.quantity);
+  return (isFinite(n) && n >= 1) ? Math.floor(n) : 1;
+}
+
+function getQuantity(){
+  const raw = ($('item-quantity').value || '').trim();
+  if(raw === '') return 1;
+  const n = Number(raw);
+  if(!isFinite(n) || Math.floor(n) !== n || n < 1 || n > MAX_QTY) return null;  // invalid
+  return n;
+}
+
+function setQuantity(n){
+  const v = Math.max(1, Math.min(MAX_QTY, Math.floor(Number(n) || 1)));
+  $('item-quantity').value = v;
+  $('qty-minus').disabled = (v <= 1);
+  $('err-quantity').style.display = 'none';
+  return v;
+}
+
+function bumpQuantity(delta){
+  const cur = getQuantity();
+  setQuantity((cur === null ? 1 : cur) + delta);
+}
+
+function initQuantity(){
+  $('qty-minus').addEventListener('click', ()=>bumpQuantity(-1));
+  $('qty-plus').addEventListener('click',  ()=>bumpQuantity(1));
+  document.querySelectorAll('.qty-quick').forEach(b=>{
+    b.addEventListener('click',()=>{
+      if(b.dataset.set !== undefined) setQuantity(Number(b.dataset.set));
+      else bumpQuantity(Number(b.dataset.add));
+    });
+  });
+  $('item-quantity').addEventListener('input',()=>{
+    const n = getQuantity();
+    $('qty-minus').disabled = (n !== null && n <= 1);
+    if(n !== null) $('err-quantity').style.display = 'none';
+  });
+  $('item-quantity').addEventListener('blur',()=>{
+    const n = getQuantity();
+    if(n === null) return;              // leave invalid value visible for correction
+    setQuantity(n);
+  });
+  setQuantity(1);
+}
+
+// ══════════════════════════════════════════════════════════════
+// PRESETS
+// ══════════════════════════════════════════════════════════════
+// A preset stores the descriptive fields of an item, never the quantity —
+// the count changes every time, the profile does not.
+function captureFormProfile(){
+  return {
+    material: getChipValue('chips-material'),
+    functional_categories: getFunctionalCategories(),
+    likely_source: getChipValue('chips-source'),
+    brand: selectedBrand,
+    size: getChipValue('chips-size'),
+    is_fragment: $('chip-fragment').classList.contains('selected'),
+    notes: $('item-notes').value.trim()
+  };
+}
+
+function describeProfile(p){
+  const bits = [];
+  if(p.material) bits.push(p.material.replace(/_/g,'/'));
+  if(p.functional_categories) bits.push(p.functional_categories.split(',').length + ' category(ies)');
+  if(p.brand) bits.push(p.brand);
+  if(p.size) bits.push(p.size);
+  if(p.is_fragment) bits.push('fragment');
+  return bits.join(' \u00b7 ') || 'nothing selected yet';
+}
+
+function renderPresets(){
+  const list = $('preset-list');
+  if(!list) return;
+  if(!presets.length){
+    list.innerHTML = '<span class="preset-empty">No presets yet. Fill in an item, then tap "Save current form as a preset".</span>';
+    return;
+  }
+  list.innerHTML = presets.map((p,i)=>
+    '<span class="preset-chip">' +
+      '<button type="button" class="preset-apply" data-i="'+i+'">'+esc(p.name)+'</button>' +
+      '<button type="button" class="preset-del" data-i="'+i+'" aria-label="Delete preset">\u00d7</button>' +
+    '</span>').join('');
+
+  list.querySelectorAll('.preset-apply').forEach(b=>{
+    b.addEventListener('click',()=>applyPreset(Number(b.dataset.i)));
+  });
+  list.querySelectorAll('.preset-del').forEach(b=>{
+    b.addEventListener('click',()=>{
+      const i = Number(b.dataset.i);
+      const nm = presets[i] && presets[i].name;
+      if(!nm) return;
+      presets.splice(i,1);
+      LS.save();
+      renderPresets();
+      showStatus($('item-status'),'Preset "'+nm+'" deleted.','info');
+      setTimeout(()=>hideStatus($('item-status')),2000);
+    });
+  });
+}
+
+// Apply a preset WITHOUT touching quantity — the sorter sets that per pile.
+function applyPreset(i){
+  const p = presets[i];
+  if(!p) return;
+  const qty = $('item-quantity').value;
+  populateItemForm(Object.assign({}, p.profile), true);
+  $('item-quantity').value = qty;
+  setQuantity(getQuantity() === null ? 1 : getQuantity());
+  showStatus($('item-status'),'Preset "'+p.name+'" applied. Set the quantity, then save.','success');
+  setTimeout(()=>hideStatus($('item-status')),2500);
+}
+
+function initPresets(){
+  renderPresets();
+
+  $('btn-save-preset').addEventListener('click',()=>{
+    const profile = captureFormProfile();
+    if(!profile.material){
+      showStatus($('item-status'),'Choose at least a material before saving a preset.','error');
+      return;
+    }
+    $('preset-name-input').value = '';
+    $('preset-name-err').style.display = 'none';
+    $('preset-name-summary').textContent = 'Will save: ' + describeProfile(profile);
+    openModal('modal-preset-name');
+    $('preset-name-input').focus();
+
+    $('modal-preset-save').onclick = ()=>{
+      const name = $('preset-name-input').value.trim();
+      if(!name){ $('preset-name-err').style.display='block'; return; }
+      const existing = presets.findIndex(x=>x.name.toLowerCase()===name.toLowerCase());
+      if(existing >= 0) presets[existing] = { name, profile };   // overwrite by name
+      else presets.push({ name, profile });
+      LS.save();
+      renderPresets();
+      closeModal('modal-preset-name');
+      showStatus($('item-status'),'Preset "'+name+'" saved.','success');
+      setTimeout(()=>hideStatus($('item-status')),2500);
+    };
+  });
+
+  $('modal-preset-cancel').addEventListener('click',()=>closeModal('modal-preset-name'));
+}
+
+function getFunctionalCategories(){
+  const cats = [];
+  document.querySelectorAll('#panel-items .toggle-chip').forEach(chip=>{
+    if(chip.classList.contains('selected') && chip.id !== 'chip-fragment'){
+      cats.push(chip.dataset.value);
+    }
+  });
+  return cats.join(',');
+}
+
+function clearItemForm(keepQuantity){
+  document.querySelectorAll('#panel-items .chip').forEach(c=>c.classList.remove('selected'));
+  SUB_GROUP_IDS.forEach(id=>{ const el=$(id); if(el) el.classList.add('hidden'); });
+  $('item-notes').value = '';
+  $('err-material').style.display = 'none';
+  if(!keepQuantity) setQuantity(1);
+  selectedBrand = '';
+  $('brand-search').value = '';
+  $('brand-selected-display').classList.add('hidden');
+  $('brand-dropdown').classList.remove('open');
+  hideStatus($('item-status'));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ══════════════════════════════════════════════════════════════
+// BRAND SEARCH
+// ══════════════════════════════════════════════════════════════
+function initBrandSearch(){
+  const input  = $('brand-search');
+  const drop   = $('brand-dropdown');
+
+  function addOption(label, value, extraClass){
+    const div = document.createElement('div');
+    div.className = 'brand-item' + (extraClass ? ' '+extraClass : '');
+    div.textContent = label;
+    div.dataset.value = value;
+    div.addEventListener('mousedown',(e)=>{
+      e.preventDefault(); // prevent blur before click
+      selectBrand(value);
+    });
+    drop.appendChild(div);
+  }
+  function addHeader(text){
+    const h = document.createElement('div');
+    h.className = 'brand-group';
+    h.textContent = text;
+    drop.appendChild(h);
+  }
+
+  function renderDropdown(filter=''){
+    const f = filter.trim().toLowerCase();
+    drop.innerHTML = '';
+    let shown = 0;
+
+    // Recently used, only when not filtering
+    if(!f && recentBrands.length){
+      addHeader('Recently used');
+      recentBrands.forEach(b=>{ addOption(b, b, 'recent-item'); shown++; });
+    }
+
+    BRAND_GROUPS.forEach(g=>{
+      const matches = f ? g.items.filter(b=>b.toLowerCase().includes(f)) : g.items;
+      if(!matches.length) return;
+      addHeader(g.group);
+      matches.forEach(b=>{
+        // "Other" commits whatever the user typed, or the literal word
+        addOption(b, b==='Other' ? (filter.trim() || 'Other') : b);
+        shown++;
+      });
+    });
+
+    if(!shown){
+      const typed = filter.trim();
+      if(typed){
+        addHeader('Not in list');
+        addOption('Use "'+typed+'"', typed);
+      } else {
+        drop.innerHTML = '<div class="brand-item" style="color:var(--text-light)">No brands available</div>';
+      }
+    }
+    drop.classList.add('open');
+    brandDropdownOpen = true;
+  }
+
+  input.addEventListener('focus',()=>renderDropdown(input.value));
+  input.addEventListener('input',()=>{
+    // Typing invalidates any prior confirmed selection
+    if(selectedBrand && input.value.trim() !== selectedBrand){
+      selectedBrand = '';
+      $('brand-selected-display').classList.add('hidden');
+    }
+    renderDropdown(input.value);
+  });
+  input.addEventListener('blur',()=>{
+    setTimeout(()=>{
+      drop.classList.remove('open');
+      brandDropdownOpen = false;
+      // Deliberately does NOT auto-commit typed text. A partially typed word
+      // must never become a recorded brand — the user picks from the list,
+      // presses Enter, or the field stays empty.
+      if(!selectedBrand && input.value.trim()){
+        showStatus($('item-status'),'Brand not set — pick from the list or press Enter to use what you typed.','warn');
+      }
+    },180);
+  });
+  input.addEventListener('keydown',(e)=>{
+    if(e.key==='Enter'){
+      e.preventDefault();
+      const highlighted = drop.querySelector('.brand-item.highlighted');
+      if(highlighted) selectBrand(highlighted.dataset.value);
+      else if(input.value.trim()) selectBrand(input.value.trim());
+    }
+    if(e.key==='ArrowDown' || e.key==='ArrowUp'){
+      e.preventDefault();
+      const items = Array.from(drop.querySelectorAll('.brand-item'));
+      if(!items.length) return;
+      let idx = items.findIndex(el=>el.classList.contains('highlighted'));
+      if(e.key==='ArrowDown') idx = (idx < items.length-1) ? idx+1 : 0;
+      else                    idx = (idx > 0) ? idx-1 : items.length-1;
+      items.forEach(el=>el.classList.remove('highlighted'));
+      items[idx].classList.add('highlighted');
+      items[idx].scrollIntoView({block:'nearest'});
+    }
+    if(e.key==='Escape'){ drop.classList.remove('open'); }
+  });
+
+  $('btn-clear-brand').addEventListener('click',()=>{
+    selectedBrand = '';
+    input.value = '';
+    $('brand-selected-display').classList.add('hidden');
+    hideStatus($('item-status'));
+  });
+}
+
+function selectBrand(name){
+  selectedBrand = name;
+  $('brand-search').value = name;
+  $('brand-selected-name').textContent = name;
+  $('brand-selected-display').classList.remove('hidden');
+  $('brand-dropdown').classList.remove('open');
+  hideStatus($('item-status'));
+}
+
+function recordRecentBrand(name){
+  if(!name) return;
+  recentBrands = [name].concat(recentBrands.filter(b=>b!==name)).slice(0,MAX_RECENT);
+  LS.save();
+}
+
+// ══════════════════════════════════════════════════════════════
+// NETWORK — post to Apps Script with queue
+// ══════════════════════════════════════════════════════════════
+async function postToScript(payload){
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method:'POST',
+      body: JSON.stringify(Object.assign({}, payload, { token: SCRIPT_TOKEN })),
+      // No Content-Type header — avoids CORS preflight that Apps Script can't handle
+    });
+    const data = await res.json();
+    setConnState(true);
+    return data;
+  } catch(e) {
+    setConnState(false, describeConnError(e));
+    return { ok:false, error: e.message, networkFailure:true };
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// CONNECTION INDICATOR
+// ══════════════════════════════════════════════════════════════
+// Design rule: the indicator reports EVIDENCE, not navigator.onLine.
+// navigator.onLine is unreliable (it commonly reports false for pages
+// opened from file://, behind some VPNs, and on some desktop setups),
+// so it must never override the result of a request that actually
+// succeeded. A completed round-trip is proof; the flag is only a hint.
+let lastConnError = '';
+
+function setConnState(state, detail){
+  const dot = $('conn-dot'), label = $('conn-label'), wrap = $('conn-status');
+  if(!dot || !label) return;
+  dot.classList.remove('offline','checking');
+
+  if(state === 'checking'){
+    dot.classList.add('checking');
+    label.textContent = 'Checking…';
+    if(wrap) wrap.title = 'Testing the connection to your Google Sheet…';
+    return;
+  }
+  dot.classList.toggle('offline', !state);
+  label.textContent = state ? 'Online' : 'Offline';
+  lastConnError = state ? '' : (detail || '');
+  if(wrap){
+    wrap.title = state
+      ? 'Connected to your Google Sheet. Tap to re-test.'
+      : (lastConnError || 'Not reaching the sheet.') + ' — tap for details.';
+  }
+}
+
+// GET URL with the shared secret appended
+function readUrl(){
+  if(!SCRIPT_TOKEN) return SCRIPT_URL;
+  return SCRIPT_URL + (SCRIPT_URL.indexOf('?')===-1 ? '?' : '&') + 'token=' + encodeURIComponent(SCRIPT_TOKEN);
+}
+
+// Turn a raw failure into something a field volunteer can act on
+function describeConnError(err){
+  const msg = (err && err.message) ? err.message : String(err);
+  if(!SCRIPT_URL)
+    return 'No endpoint is set on this device. Review tab → Connection Settings.';
+  if(!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec/.test(SCRIPT_URL)){
+    if(/\/dev(\?|$)/.test(SCRIPT_URL))
+      return 'SCRIPT_URL ends in /dev. Use the /exec URL from Deploy → Manage deployments.';
+    return 'SCRIPT_URL does not look like a published Apps Script /exec URL.';
+  }
+  if(/Unexpected token|JSON|Unexpected end of/i.test(msg))
+    return 'The script returned a web page instead of data — usually an authorization or deployment problem. Re-deploy with "Who has access: Anyone".';
+  if(/Failed to fetch|NetworkError|Load failed|TypeError/i.test(msg))
+    return 'Request blocked or no connection. If you have signal, re-check the deployment access setting.';
+  return msg;
+}
+
+// Actively test the endpoint. Returns true/false; updates the indicator.
+async function probeConnection(){
+  setConnState('checking');
+  try{
+    const res  = await fetch(readUrl());
+    const data = await res.json();
+    if(data && data.ok){ setConnState(true); return true; }
+    const e = (data && data.error) || 'unknown';
+    if(/unauthorized/i.test(String(e))){
+      setConnState(false, 'Rejected: this device\'s token does not match the one on the sheet. Review tab → Connection Settings → Change Settings.');
+    } else {
+      setConnState(false, 'The script replied with an error: ' + e);
+    }
+    return false;
+  }catch(e){
+    setConnState(false, describeConnError(e));
+    return false;
+  }
+}
+
+// Tapping the indicator re-tests and explains what is wrong
+function initConnIndicator(){
+  const wrap = $('conn-status');
+  if(!wrap) return;
+  wrap.style.cursor = 'pointer';
+  wrap.addEventListener('click', async ()=>{
+    const ok = await probeConnection();
+    if(!ok){
+      $('conn-detail-msg').textContent = lastConnError || 'Could not reach the sheet.';
+      $('conn-detail-url').textContent = SCRIPT_URL;
+      openModal('modal-conn-detail');
+    }
+  });
+}
+
+// The OS says the network dropped — a genuine signal, so reflect it.
+// The reverse (OS says we're back) only prompts a real re-test.
+window.addEventListener('offline', ()=>setConnState(false, 'Device reports no network connection.'));
+window.addEventListener('online',  ()=>probeConnection());
+
+async function submitWithQueue(payload){
+  queue.push(payload);
+  LS.save();
+  updateQueueCount();
+  const result = await postToScript(payload);
+  if(result && result.ok){
+    queue = queue.filter(q=>q!==payload);
+    LS.save();
+    updateQueueCount();
+  } else if(result && result.ok === false && !result.networkFailure){
+    // The script was reached and rejected this. Retrying will never fix it,
+    // so drop it from the queue and surface the real reason instead of
+    // pretending we are offline.
+    queue = queue.filter(q=>q!==payload);
+    LS.save();
+    updateQueueCount();
+  }
+  return result;
+}
+
+function updateQueueCount(){
+  $('queue-size').textContent = queue.length;
+}
+
+// ══════════════════════════════════════════════════════════════
+// BAG TAB
+// ══════════════════════════════════════════════════════════════
+let _prevTransect = '';
+let _prevBagNum   = '';
+let _interruptPending = null; // { field, value }
+
+function initBagTab(){
+  const tid = $('bag-transect');
+  const bnum = $('bag-number');
+  const today = new Date().toISOString().slice(0,10);
+  $('bag-date').value = today;
+
+  // Watch for changes when active bag exists
+  tid.addEventListener('change', ()=>handleBagFieldChange());
+  bnum.addEventListener('change', ()=>handleBagFieldChange());
+
+  $('btn-save-bag').addEventListener('click', saveBag);
+  $('btn-update-bag-info').addEventListener('click', updateBagInfo);
+  $('btn-cancel-bag-info').addEventListener('click', cancelBagInfoChange);
+
+  // Modal handlers
+  $('modal-change-bag-info').addEventListener('click',()=>{
+    closeModal('modal-bag-interrupt');
+    $('change-transect').value = activeBag ? activeBag.transect_id : '';
+    $('change-bagnum').value   = activeBag ? activeBag.bag_number  : '';
+    $('change-bag-info-form').classList.remove('hidden');
+  });
+  $('modal-new-bag').addEventListener('click',()=>{
+    closeModal('modal-bag-interrupt');
+    activeBag = null;
+    LS.save();
+    updateCtxBanner();
+    // Keep the new values the user typed
+  });
+  $('modal-cancel-interrupt').addEventListener('click',()=>{
+    closeModal('modal-bag-interrupt');
+    // Restore previous values
+    tid.value  = _prevTransect;
+    bnum.value = _prevBagNum;
+  });
+
+  if(activeBag){
+    tid.value  = activeBag.transect_id;
+    bnum.value = activeBag.bag_number;
+    if(activeBag.classifier_name) $('bag-classifier').value = activeBag.classifier_name;
+    _prevTransect = activeBag.transect_id;
+    _prevBagNum   = activeBag.bag_number;
+  }
+
+  renderLastBagCard();
+}
+
+function handleBagFieldChange(){
+  if(!activeBag) return;
+  const newTid  = $('bag-transect').value.trim();
+  const newBnum = $('bag-number').value.trim();
+  if(newTid !== activeBag.transect_id || newBnum !== activeBag.bag_number){
+    openModal('modal-bag-interrupt');
+  }
+}
+
+function bagKey(tid,bnum){
+  return String(tid).trim().toLowerCase()+'|'+String(bnum).trim().toLowerCase();
+}
+
+// Check the last-loaded sheet snapshot for an existing bag with this transect+number.
+// Returns the matching row, or null.
+function findExistingBag(tid,bnum){
+  const k = bagKey(tid,bnum);
+  return (reviewData.bags||[]).find(b=>bagKey(b.transect_id,b.bag_number)===k) || null;
+}
+
+async function saveBag(){
+  const tid    = $('bag-transect').value.trim();
+  const bnum   = $('bag-number').value.trim();
+  const date   = $('bag-date').value;
+  const wt     = parseFloat($('bag-weight').value);
+  let valid = true;
+
+  fieldError($('f-transect'), $('err-transect'), !tid);    if(!tid) valid=false;
+  fieldError($('f-bagnum'),   $('err-bagnum'),   !bnum);   if(!bnum) valid=false;
+  fieldError($('f-date'),     $('err-date'),     !date);   if(!date) valid=false;
+  fieldError($('f-weight'),   $('err-weight'),   isNaN(wt)||wt<0); if(isNaN(wt)||wt<0) valid=false;
+
+  if(!valid) return;
+
+  // Duplicate check against the most recent sheet snapshot
+  const dup = findExistingBag(tid,bnum);
+  if(dup){
+    $('modal-duplicate-msg').textContent =
+      `Transect ${tid} / Bag ${bnum} already exists in the sheet` +
+      (dup.date ? ` (recorded ${dup.date}` : ' (') +
+      (dup.classifier_name ? `, by ${dup.classifier_name})` : ')') +
+      '. Saving again will create a second row for the same bag. Use Review → Resume if you meant to add more items to it.';
+    openModal('modal-duplicate-bag');
+    $('modal-dup-continue').onclick = ()=>{
+      closeModal('modal-duplicate-bag');
+      commitBag(tid,bnum,date,wt);
+    };
+    $('modal-dup-cancel').onclick = ()=>closeModal('modal-duplicate-bag');
+    return;
+  }
+
+  commitBag(tid,bnum,date,wt);
+}
+
+async function commitBag(tid,bnum,date,wt){
+  const classifier = $('bag-classifier').value.trim();
+  const ts = now();
+  const payload = {
+    action:'writeBag',
+    data:{
+      timestamp:ts, transect_id:tid, bag_number:bnum,
+      classifier_name:classifier, date, bag_weight_lb:wt,
+      plastic_weight_lb:'', confirmed:false,
+      field_notes:$('bag-notes').value.trim()
+    }
+  };
+
+  $('btn-save-bag').disabled = true;
+  showStatus($('bag-status'), 'Saving…', 'info');
+
+  const res = await submitWithQueue(payload);
+  $('btn-save-bag').disabled = false;
+
+  if(res && res.ok){
+    showStatus($('bag-status'),'Bag saved!','success');
+  } else if(res && res.ok === false && !res.networkFailure){
+    showStatus($('bag-status'),
+      'NOT SAVED. The sheet rejected this bag: ' + (res.error || 'unknown error'),
+      'error');
+    $('btn-save-bag').disabled = false;
+    return;                                   // do not open a bag that was not written
+  } else {
+    showStatus($('bag-status'),'Saved to queue (offline). Will retry when connected.','warn');
+  }
+
+  activeBag = { transect_id:tid, bag_number:bnum, classifier_name:classifier };
+  lastBag = { timestamp:ts, data:payload.data };
+  bagItemCount = 0;                    // new bag starts with a fresh item count
+  sessionBags.push(payload.data);      // local backup
+  _prevTransect = tid;
+  _prevBagNum   = bnum;
+  LS.save();
+  renderLastBagCard();
+
+  setTimeout(()=>switchTab('items'), 800);
+}
+
+async function updateBagInfo(){
+  const newTid  = $('change-transect').value.trim();
+  const newBnum = $('change-bagnum').value.trim();
+  if(!newTid || !newBnum){ alert('Please fill in both fields.'); return; }
+
+  const oldTid  = activeBag.transect_id;
+  const oldBnum = activeBag.bag_number;
+
+  $('btn-update-bag-info').disabled = true;
+  const res = await postToScript({
+    action:'updateBagInfo',
+    oldTransectId: oldTid, oldBagNumber: oldBnum,
+    newTransectId: newTid, newBagNumber: newBnum
+  });
+
+  if(res && res.ok){
+    activeBag.transect_id = newTid;
+    activeBag.bag_number  = newBnum;
+    $('bag-transect').value = newTid;
+    $('bag-number').value   = newBnum;
+    _prevTransect = newTid;
+    _prevBagNum   = newBnum;
+    LS.save();
+    $('change-bag-info-form').classList.add('hidden');
+  } else {
+    alert('Update failed: ' + (res ? res.error : 'Network error'));
+  }
+  $('btn-update-bag-info').disabled = false;
+}
+
+function cancelBagInfoChange(){
+  $('bag-transect').value = _prevTransect;
+  $('bag-number').value   = _prevBagNum;
+  $('change-bag-info-form').classList.add('hidden');
+}
+
+function renderLastBagCard(){
+  const card = $('last-bag-card');
+  if(!lastBag){ card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+  const d = lastBag.data;
+  $('last-bag-summary').innerHTML = `
+    <div class="rr-head"><span>T: ${esc(d.transect_id)} / Bag: ${esc(d.bag_number)}</span>
+    <span class="badge badge-blue">${esc(d.bag_weight_lb)} lb</span></div>
+    <div class="rr-meta">${fmtDate(lastBag.timestamp)} · ${esc(d.classifier_name)||'—'}</div>`;
+}
+
+$('btn-edit-bag').addEventListener('click', async ()=>{
+  if(!lastBag) return;
+  // delete from sheet, repopulate form
+  const res = await postToScript({ action:'delete', tab:'Bags', timestamp: lastBag.timestamp });
+  if(res && res.ok){
+    const d = lastBag.data;
+    $('bag-transect').value    = d.transect_id;
+    $('bag-number').value      = d.bag_number;
+    $('bag-classifier').value  = d.classifier_name||'';
+    $('bag-date').value        = d.date;
+    $('bag-weight').value      = d.bag_weight_lb;
+    $('bag-notes').value       = d.field_notes||'';
+    sessionBags = sessionBags.filter(r=>r.timestamp !== lastBag.timestamp);
+    lastBag = null;
+    LS.save();
+    renderLastBagCard();
+    switchTab('bag');
+  } else {
+    alert('Could not retrieve record: ' + (res?res.error:'Network error'));
+  }
+});
+
+// Best estimate of how many items belong to a bag, using whatever we know:
+// the last sheet snapshot plus anything this device recorded.
+function knownItemCountFor(tid,bnum){
+  const k = bagKey(tid,bnum);
+  const byTs = {};
+  ((reviewData && reviewData.items) || []).forEach(i=>{
+    if(bagKey(i.transect_id,i.bag_number)===k) byTs[String(i.timestamp)] = itemQty(i);
+  });
+  sessionItems.forEach(i=>{
+    if(bagKey(i.transect_id,i.bag_number)===k) byTs[String(i.timestamp)] = itemQty(i);
+  });
+  let total = 0;
+  for(const t in byTs) total += byTs[t];
+  return total;
+}
+
+// Deleting a bag must also delete that bag's items, or the sheet is left with
+// orphaned item rows that still count toward every total.
+$('btn-delete-bag').addEventListener('click',()=>{
+  if(!lastBag) return;
+  const tid  = lastBag.data.transect_id;
+  const bnum = lastBag.data.bag_number;
+  const n    = knownItemCountFor(tid,bnum);
+
+  $('modal-delete-msg').textContent =
+    `Delete Transect ${tid} / Bag ${bnum} from the sheet` +
+    (n ? `, along with its ${n} recorded item${n===1?'':'s'}?` : ' and all of its recorded items?') +
+    ' This cannot be undone.';
+  openModal('modal-delete-confirm');
+
+  $('modal-delete-yes').onclick = async ()=>{
+    closeModal('modal-delete-confirm');
+    if(!lastBag) return;
+
+    let res = await postToScript({
+      action:'deleteBag', transect_id:tid, bag_number:bnum, timestamp:lastBag.timestamp
+    });
+
+    // Older deployments don't know 'deleteBag'. Fall back to deleting the
+    // items individually so this still works before the script is updated.
+    if(res && !res.ok && !res.networkFailure && /unknown action/i.test(String(res.error||''))){
+      res = await cascadeDeleteBagClientSide(tid,bnum,lastBag.timestamp);
+    }
+
+    if(res && res.ok){
+      const k = bagKey(tid,bnum);
+      sessionBags  = sessionBags.filter(r=>r.timestamp !== lastBag.timestamp);
+      sessionItems = sessionItems.filter(r=>bagKey(r.transect_id,r.bag_number)!==k);
+      if(lastItem && bagKey(lastItem.data.transect_id,lastItem.data.bag_number)===k) lastItem = null;
+      if(activeBag && bagKey(activeBag.transect_id,activeBag.bag_number)===k){
+        activeBag = null; bagItemCount = 0; updateCtxBanner();
+      }
+      lastBag=null; LS.save(); renderLastBagCard(); renderLastItemCard();
+      const removed = (res.itemsDeleted===undefined) ? n : res.itemsDeleted;
+      showStatus($('bag-status'),
+        `Bag deleted along with ${removed} item${removed===1?'':'s'}.`, 'success');
+      setTimeout(()=>hideStatus($('bag-status')), 3000);
+    } else {
+      alert('Delete failed: '+(res?res.error:'Network error')+
+            '\n\nNothing was removed. Please try again.');
+    }
+  };
+});
+
+// Fallback path: read the sheet, delete each matching item, then the bag row.
+async function cascadeDeleteBagClientSide(tid,bnum,bagTimestamp){
+  let snapshot;
+  try{
+    snapshot = await fetch(readUrl()).then(r=>r.json());
+  }catch(e){
+    return { ok:false, error:'Could not read the sheet to find this bag\'s items.', networkFailure:true };
+  }
+  if(!snapshot || !snapshot.ok) return { ok:false, error:(snapshot&&snapshot.error)||'Could not read the sheet.' };
+
+  const k = bagKey(tid,bnum);
+  const victims = (snapshot.items||[]).filter(i=>bagKey(i.transect_id,i.bag_number)===k);
+
+  let itemsDeleted = 0;
+  for(const it of victims){
+    const r = await postToScript({ action:'delete', tab:'Items', timestamp: it.timestamp });
+    if(r && r.ok) itemsDeleted++;
+    else return { ok:false, error:'Removed '+itemsDeleted+' item(s), then failed: '+((r&&r.error)||'network error') };
+  }
+  const bagRes = await postToScript({ action:'delete', tab:'Bags', timestamp: bagTimestamp });
+  if(!bagRes || !bagRes.ok) return { ok:false, error:'Items removed, but the bag row failed to delete: '+((bagRes&&bagRes.error)||'network error') };
+  return { ok:true, itemsDeleted };
+}
+
+// ══════════════════════════════════════════════════════════════
+// ITEMS TAB
+// ══════════════════════════════════════════════════════════════
+function initItemsTab(){
+  // Two-action save: continue in this bag, or finish and move to plastic weight
+  $('btn-save-item').addEventListener('click',   ()=>saveItem('next'));
+  $('btn-save-repeat').addEventListener('click', ()=>saveItem('repeat'));
+  $('btn-save-finish').addEventListener('click', ()=>saveItem('finish'));
+
+  $('btn-edit-item').addEventListener('click', async ()=>{
+    if(!lastItem) return;
+    const res = await postToScript({ action:'delete', tab:'Items', timestamp: lastItem.timestamp });
+    if(res && res.ok){
+      populateItemForm(lastItem.data);
+      sessionItems = sessionItems.filter(r=>r.timestamp !== lastItem.timestamp);
+      bagItemCount = Math.max(0, bagItemCount - itemQty(lastItem.data));
+      lastItem = null; LS.save(); renderLastItemCard(); updateCtxBanner();
+    } else {
+      alert('Could not retrieve record: '+(res?res.error:'Network error'));
+    }
+  });
+
+  $('btn-delete-item').addEventListener('click',()=>{
+    $('modal-delete-msg').textContent = 'Delete this item record from the sheet? This cannot be undone.';
+    openModal('modal-delete-confirm');
+    $('modal-delete-yes').onclick = async ()=>{
+      closeModal('modal-delete-confirm');
+      if(!lastItem) return;
+      const res = await postToScript({ action:'delete', tab:'Items', timestamp: lastItem.timestamp });
+      if(res && res.ok){
+        sessionItems = sessionItems.filter(r=>r.timestamp !== lastItem.timestamp);
+        bagItemCount = Math.max(0, bagItemCount - itemQty(lastItem.data));
+        lastItem=null; LS.save(); renderLastItemCard(); updateCtxBanner();
+      }
+      else alert('Delete failed: '+(res?res.error:'Network error'));
+    };
+  });
+}
+
+function populateItemForm(d, keepQuantity){
+  clearItemForm(keepQuantity);
+  // Material
+  document.querySelectorAll('#chips-material .chip').forEach(c=>{
+    if(c.dataset.value===d.material) c.classList.add('selected');
+  });
+  // Functional categories
+  const cats = (d.functional_categories||'').split(',').map(s=>s.trim());
+  document.querySelectorAll('#panel-items .toggle-chip').forEach(chip=>{
+    if(cats.includes(chip.dataset.value)) chip.classList.add('selected');
+  });
+  // Any selected parent chip reveals its sub-group
+  document.querySelectorAll('#panel-items .toggle-chip[data-sub]').forEach(chip=>{
+    if(chip.classList.contains('selected')){
+      const sub = $(chip.dataset.sub);
+      if(sub) sub.classList.remove('hidden');
+    }
+  });
+  // Source
+  document.querySelectorAll('#chips-source .chip').forEach(c=>{
+    if(c.dataset.value===d.likely_source) c.classList.add('selected');
+  });
+  // Size
+  document.querySelectorAll('#chips-size .chip').forEach(c=>{
+    if(c.dataset.value===d.size) c.classList.add('selected');
+  });
+  // Brand
+  if(d.brand){ selectBrand(d.brand); }
+  // Fragment
+  if(d.is_fragment===true||d.is_fragment==='true') $('chip-fragment').classList.add('selected');
+  // Notes
+  $('item-notes').value = d.notes||'';
+  // Quantity (edited items carry theirs; presets deliberately do not)
+  if(!keepQuantity) setQuantity(d.quantity || 1);
+}
+
+// mode: 'next'   → save, then present a blank form for the next item
+//       'repeat' → save, but KEEP the form filled for another near-identical item
+//       'finish' → save and move on to the Plastic Weight tab
+async function saveItem(mode){
+  if(!activeBag){
+    openModal('modal-no-bag'); return;
+  }
+  const material = getChipValue('chips-material');
+  if(!material){
+    $('err-material').style.display='block';
+    showStatus($('item-status'),'Select a material before saving.','error');
+    window.scrollTo({top:0,behavior:'smooth'});
+    return;
+  }
+  $('err-material').style.display='none';
+
+  const quantity = getQuantity();
+  if(quantity === null){
+    $('err-quantity').style.display='block';
+    showStatus($('item-status'),'Quantity must be a whole number of 1 or more.','error');
+    return;
+  }
+
+  const ts = now();
+  const payload = {
+    action:'writeItem',
+    data:{
+      timestamp:ts,
+      transect_id: activeBag.transect_id,
+      bag_number:  activeBag.bag_number,
+      classifier:  activeBag.classifier_name||'',
+      material,
+      quantity,
+      functional_categories: getFunctionalCategories(),
+      likely_source: getChipValue('chips-source'),
+      brand: selectedBrand,
+      size:  getChipValue('chips-size'),
+      is_fragment: $('chip-fragment').classList.contains('selected'),
+      notes: $('item-notes').value.trim(),
+      confirmed: false
+    }
+  };
+
+  $('btn-save-item').disabled = true;
+  $('btn-save-repeat').disabled = true;
+  $('btn-save-finish').disabled = true;
+  showStatus($('item-status'),'Saving…','info');
+
+  const res = await submitWithQueue(payload);
+  $('btn-save-item').disabled = false;
+  $('btn-save-repeat').disabled = false;
+  $('btn-save-finish').disabled = false;
+
+  const savedOk = !!(res && res.ok);
+
+  lastItem = { timestamp:ts, data:payload.data };
+  bagItemCount += quantity;
+  sessionItems.push(payload.data);     // local backup
+  if(selectedBrand) recordRecentBrand(selectedBrand);
+  LS.save();
+  renderLastItemCard();
+  updateCtxBanner();
+
+  const what = quantity === 1 ? '1 item' : quantity + ' items';
+
+  // A script-side rejection is NOT an offline queue. The record was dropped,
+  // so say so and show the reason rather than implying it is safely waiting.
+  if(!savedOk && res && res.ok === false && !res.networkFailure){
+    bagItemCount -= quantity;                       // never happened
+    sessionItems = sessionItems.filter(r=>r.timestamp !== ts);
+    lastItem = null;
+    LS.save(); renderLastItemCard(); updateCtxBanner();
+    showStatus($('item-status'),
+      'NOT SAVED. The sheet rejected this item: ' + (res.error || 'unknown error') +
+      ' — nothing was recorded. Your form is unchanged, so you can retry once the sheet is fixed.',
+      'error');
+    window.scrollTo({top:0,behavior:'smooth'});
+    return;
+  }
+
+  const verb = savedOk ? 'saved' : 'queued (offline)';
+
+  if(mode === 'finish'){
+    clearItemForm();
+    showStatus($('wt-status'),
+      `${what} ${verb}. Bag total: ${bagItemCount}. Now record the plastic weight.`,
+      savedOk ? 'success' : 'warn');
+    switchTab('weights');
+    return;
+  }
+
+  if(mode === 'repeat'){
+    // Keep every selection AND the quantity so a near-identical pile
+    // only needs the one field that differs changed.
+    hideStatus($('item-status'));
+    showStatus($('item-status'),
+      `${what} ${verb}. Bag total: ${bagItemCount}. Form kept — change what differs, then save again.`,
+      savedOk ? 'success' : 'warn');
+    setTimeout(()=>hideStatus($('item-status')), 3000);
+    return;
+  }
+
+  // 'next' — clear and stay put, keeping the confirmation visible briefly
+  clearItemForm();
+  showStatus($('item-status'),
+    `${what} ${verb}. Bag total: ${bagItemCount}. Ready for the next one.`,
+    savedOk ? 'success' : 'warn');
+  setTimeout(()=>hideStatus($('item-status')), 2500);
+}
+
+function renderLastItemCard(){
+  const card = $('last-item-card');
+  if(!lastItem){ card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+  const d = lastItem.data;
+  $('last-item-summary').innerHTML = `
+    <div class="rr-head"><span>${esc(d.material)||'—'}${itemQty(d)>1?'<span class="qty-badge">×'+itemQty(d)+'</span>':''}</span>
+    <span class="badge badge-green">${esc(d.size)||'—'}</span></div>
+    <div class="rr-meta">${esc(d.functional_categories)||'—'} · Brand: ${esc(d.brand)||'—'} · ${fmtDate(lastItem.timestamp)}</div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// WEIGHTS TAB
+// ══════════════════════════════════════════════════════════════
+function updateWeightsTab(){
+  if(activeBag){
+    $('wt-bag-label').textContent = `Transect ${activeBag.transect_id} / Bag ${activeBag.bag_number}`;
+  }
+}
+
+$('plastic-weight').addEventListener('input',()=>{
+  fieldError($('f-plastic-wt'),$('err-plastic-wt'),false);
+});
+
+$('btn-confirm-bag').addEventListener('click', async ()=>{
+  const wt = parseFloat($('plastic-weight').value);
+  if(isNaN(wt)||wt<0){
+    fieldError($('f-plastic-wt'),$('err-plastic-wt'),true);
+    return;
+  }
+  fieldError($('f-plastic-wt'),$('err-plastic-wt'),false);
+
+  if(!activeBag){ openModal('modal-no-bag'); return; }
+
+  // Snapshot bag identity before clearing state
+  const tid = activeBag.transect_id;
+  const bnum = activeBag.bag_number;
+
+  const payload = {
+    action: 'confirmBag',
+    data: {
+      timestamp: now(),
+      transect_id: tid,
+      bag_number: bnum,
+      plastic_weight_lb: wt
+    }
+  };
+
+  // Clear active bag state and UI immediately — don't wait on network.
+  // Every per-bag field must be reset here, or the next bag silently
+  // inherits the previous bag's notes and weight.
+  activeBag = null;
+  bagItemCount = 0;
+  lastItem = null;
+  LS.save();
+  $('bag-weight').value     = '';
+  $('bag-number').value     = '';
+  $('bag-transect').value   = '';
+  $('bag-notes').value      = '';
+  $('bag-date').value       = new Date().toISOString().slice(0,10);
+  $('plastic-weight').value = '';
+  // classifier_name is intentionally preserved — same person usually sorts several bags
+  fieldError($('f-transect'), $('err-transect'), false);
+  fieldError($('f-bagnum'),   $('err-bagnum'),   false);
+  fieldError($('f-date'),     $('err-date'),     false);
+  fieldError($('f-weight'),   $('err-weight'),   false);
+  hideStatus($('bag-status'));
+  renderLastItemCard();
+  _prevTransect = '';
+  _prevBagNum   = '';
+
+  // Queue and send — same pattern as writeBag/writeItem
+  showStatus($('wt-status'),'Confirming…','info');
+  const res = await submitWithQueue(payload);
+
+  if(res && res.ok){
+    showStatus($('wt-status'),'Bag confirmed!','success');
+  } else if(res && res.networkFailure){
+    showStatus($('wt-status'),'Queued for sync — will confirm when reconnected.','warn');
+  } else {
+    // Reached the script but it refused. Do not claim this is a sync issue.
+    showStatus($('wt-status'),
+      'NOT confirmed. The sheet rejected it: ' + ((res && res.error) || 'unknown error') +
+      ' — your bag and item rows are safe; fix the sheet, then use Review → Resume to confirm this bag.',
+      'error');
+    return;   // stay on this tab so the message is read
+  }
+  setTimeout(()=>{
+    hideStatus($('wt-status'));
+    switchTab('bag');
+  }, 900);
+});
+
+// ══════════════════════════════════════════════════════════════
+// REVIEW TAB
+// ══════════════════════════════════════════════════════════════
+function setReviewMode(mode){
+  reviewMode = mode;
+  ['items','bags','orphan'].forEach(m=>{
+    $(`rv-tab-${m}`).classList.toggle('selected', m===mode);
+    $(`rv-panel-${m}`).classList.toggle('hidden', m!==mode);
+  });
+}
+
+async function loadReview(){
+  showStatus($('review-status'),'Loading from sheet…','info');
+  const res = await fetch(readUrl()).then(r=>r.json()).catch(()=>null);
+  if(!res || !res.ok){
+    setConnState(false);
+    showStatus($('review-status'),'Could not load sheet data. Check your connection.','error');
+    return;
+  }
+  setConnState(true);
+  reviewData = res;
+  hideStatus($('review-status'));
+  verifyQueue(res);
+  renderReview();
+}
+
+$('btn-refresh-review').addEventListener('click', loadReview);
+
+function verifyQueue(sheetData){
+  if(!queue.length) return;
+  const bagTs  = new Set((sheetData.bags  ||[]).map(r=>String(r.timestamp)));
+  const itemTs = new Set((sheetData.items ||[]).map(r=>String(r.timestamp)));
+  // For confirmBag: build a set of "tid|bnum" keys where confirmed===true in sheet
+  const confirmedBags = new Set(
+    (sheetData.bags||[])
+      .filter(r=>isTrue(r.confirmed))
+      .map(r=>String(r.transect_id).trim().toLowerCase()+'|'+String(r.bag_number).trim().toLowerCase())
+  );
+  const before = queue.length;
+  queue = queue.filter(q=>{
+    const ts = String(q.data && q.data.timestamp);
+    if(q.action==='writeBag'  && bagTs.has(ts))  return false;
+    if(q.action==='writeItem' && itemTs.has(ts)) return false;
+    if(q.action==='confirmBag'){
+      const d = q.data || q;
+      const k = String(d.transect_id).trim().toLowerCase()+'|'+String(d.bag_number).trim().toLowerCase();
+      if(confirmedBags.has(k)) return false;
+    }
+    return true;
+  });
+  if(queue.length < before){
+    showStatus($('queue-status'), `Verified — ${before-queue.length} queued item(s) confirmed in sheet.`, 'success');
+    LS.save();
+    updateQueueCount();
+  }
+}
+
+function renderReview(){
+  renderReviewItems();
+  renderReviewBags();
+  renderOrphanCheck();
+}
+
+function renderReviewItems(){
+  const panel = $('rv-panel-items');
+  const items = [...(reviewData.items||[])].reverse().slice(0,30);
+  if(!items.length){ panel.innerHTML='<p style="color:var(--text-light);font-size:.85rem">No items found.</p>'; return; }
+  panel.innerHTML = items.map(it=>`
+    <div class="review-row">
+      <div class="rr-head">
+        <span>T: ${esc(it.transect_id)} / Bag: ${esc(it.bag_number)}</span>
+        <span class="badge ${isTrue(it.confirmed)?'badge-green':'badge-amber'}">${isTrue(it.confirmed)?'Confirmed':'Pending'}</span>
+      </div>
+      <div class="rr-meta">${esc(it.material)||'—'}${itemQty(it)>1?' <strong>×'+itemQty(it)+'</strong>':''} · ${esc(it.functional_categories)||'—'} · Brand: ${esc(it.brand)||'—'}</div>
+      <div class="rr-meta">${fmtDate(it.timestamp)}</div>
+    </div>`).join('');
+}
+
+function renderReviewBags(){
+  const panel = $('rv-panel-bags');
+  // Sort by most recent edit (timestamp desc), then bag_number desc within transect
+  const bags = [...(reviewData.bags||[])].sort((a,b)=>{
+    if(a.transect_id !== b.transect_id) return String(b.timestamp).localeCompare(String(a.timestamp));
+    return String(b.bag_number).localeCompare(String(a.bag_number), undefined, {numeric:true});
+  });
+  if(!bags.length){ panel.innerHTML='<p style="color:var(--text-light);font-size:.85rem">No bags found.</p>'; return; }
+  panel.innerHTML = bags.map(bg=>`
+    <div class="review-row">
+      <div class="rr-head">
+        <span>T: ${esc(bg.transect_id)} / Bag: ${esc(bg.bag_number)}</span>
+        <span class="badge ${isTrue(bg.confirmed)?'badge-green':'badge-amber'}">${isTrue(bg.confirmed)?'Confirmed':'Pending'}</span>
+      </div>
+      <div class="rr-meta">${esc(bg.date)||'—'} · ${esc(bg.bag_weight_lb)||'—'} lb total · ${esc(bg.plastic_weight_lb)||'—'} lb plastic</div>
+      <div class="rr-meta">Classifier: ${esc(bg.classifier_name)||'—'} · ${fmtDate(bg.timestamp)}</div>
+      <div class="rr-actions">
+        <button class="btn btn-blue btn-sm js-resume"
+                data-tid="${esc(bg.transect_id)}"
+                data-bnum="${esc(bg.bag_number)}"
+                data-confirmed="${isTrue(bg.confirmed)?'true':'false'}">Resume</button>
+      </div>
+    </div>`).join('');
+
+  // Delegated handler — avoids breaking on transect IDs containing quotes
+  panel.querySelectorAll('.js-resume').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      resumeBagFromReview(btn.dataset.tid, btn.dataset.bnum, btn.dataset.confirmed);
+    });
+  });
+}
+
+function renderOrphanCheck(){
+  const panel = $('rv-panel-orphan');
+  const bags  = reviewData.bags  || [];
+  const items = reviewData.items || [];
+
+  // Normalize keys to trim+lowercase for comparison
+  function key(tid,bnum){ return String(tid).trim().toLowerCase()+'|'+String(bnum).trim().toLowerCase(); }
+  const bagKeys  = new Set(bags.map(b=>key(b.transect_id,b.bag_number)));
+  const itemKeys = new Set(items.map(i=>key(i.transect_id,i.bag_number)));
+
+  const orphanItems = items.filter(i=>!bagKeys.has(key(i.transect_id,i.bag_number)));
+  const zeroBags    = bags.filter(b=>!itemKeys.has(key(b.transect_id,b.bag_number)));
+
+  let html = '';
+  if(!orphanItems.length && !zeroBags.length){
+    html = '<div class="status-msg show success">No orphans found — all items match a bag record.</div>';
+  }
+  if(orphanItems.length){
+    html += `<div class="card"><div class="card-title">⚠ Items without matching bag (${orphanItems.length})</div>`;
+    html += orphanItems.map(i=>`
+      <div class="review-row">
+        <div class="rr-head"><span>T: ${esc(i.transect_id)} / Bag: ${esc(i.bag_number)}</span>
+        <span class="badge badge-red">No bag record</span></div>
+        <div class="rr-meta">${esc(i.material)||'—'} · ${fmtDate(i.timestamp)}</div>
+      </div>`).join('');
+    html += '</div>';
+  }
+  if(zeroBags.length){
+    html += `<div class="card"><div class="card-title">⚠ Bags with no items (${zeroBags.length})</div>`;
+    html += zeroBags.map(b=>`
+      <div class="review-row">
+        <div class="rr-head"><span>T: ${esc(b.transect_id)} / Bag: ${esc(b.bag_number)}</span>
+        <span class="badge badge-amber">No items</span></div>
+        <div class="rr-meta">${esc(b.date)||'—'} · ${fmtDate(b.timestamp)}</div>
+      </div>`).join('');
+    html += '</div>';
+  }
+  panel.innerHTML = html;
+}
+
+function resumeBagFromReview(tid, bnum, confirmed){
+  // Count how many items the sheet already holds for this bag, so the
+  // banner counter continues from the right number rather than restarting at 0.
+  const existing = (reviewData.items||[])
+    .filter(i=>bagKey(i.transect_id,i.bag_number)===bagKey(tid,bnum))
+    .reduce((sum,i)=>sum + itemQty(i), 0);
+
+  $('modal-resume-msg').textContent =
+    `Resume Transect ${tid} / Bag ${bnum}? ${existing} item(s) already recorded.` +
+    (confirmed==='true' ? ' This bag was previously confirmed — confirming again will overwrite the plastic weight.' : '');
+  openModal('modal-resume-bag');
+  $('modal-resume-yes').onclick = ()=>{
+    closeModal('modal-resume-bag');
+    activeBag = { transect_id:tid, bag_number:bnum, classifier_name: (activeBag&&activeBag.classifier_name)||$('bag-classifier').value.trim()||'' };
+    bagItemCount = existing;
+    lastItem = null;
+    $('bag-transect').value = tid;
+    $('bag-number').value   = bnum;
+    _prevTransect = tid;
+    _prevBagNum   = bnum;
+    LS.save();
+    updateCtxBanner();
+    renderLastItemCard();
+    switchTab('items');
+  };
+  $('modal-resume-no').onclick = ()=>closeModal('modal-resume-bag');
+}
+
+// ══════════════════════════════════════════════════════════════
+// RETRY QUEUE
+// ══════════════════════════════════════════════════════════════
+$('btn-retry-queue').addEventListener('click',()=>openModal('modal-retry'));
+$('modal-retry-no').addEventListener('click',()=>closeModal('modal-retry'));
+$('modal-retry-yes').addEventListener('click', async ()=>{
+  closeModal('modal-retry');
+  if(!queue.length){
+    showStatus($('queue-status'),'Queue is empty.','info');
+    return;
+  }
+  showStatus($('queue-status'),'Retrying…','info');
+  let success=0, fail=0;
+  for(const payload of [...queue]){
+    const res = await postToScript(payload);
+    if(res && res.ok){
+      queue = queue.filter(q=>q!==payload);
+      success++;
+    } else { fail++; }
+  }
+  LS.save();
+  updateQueueCount();
+  showStatus($('queue-status'),
+    `Done. ${success} sent, ${fail} still pending.`,
+    fail?'warn':'success');
+});
+
+// ══════════════════════════════════════════════════════════════
+// LOCAL CSV BACKUP
+// ══════════════════════════════════════════════════════════════
+const BAG_COLS  = ['timestamp','transect_id','bag_number','classifier_name','date',
+                   'bag_weight_lb','plastic_weight_lb','confirmed','field_notes'];
+const ITEM_COLS = ['timestamp','transect_id','bag_number','classifier','material',
+                   'functional_categories','likely_source','brand','size',
+                   'is_fragment','notes','confirmed','quantity'];
+
+function csvCell(v){
+  const s = (v===null||v===undefined) ? '' : String(v);
+  return /[",\n\r]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+}
+
+function toCSV(cols, rows){
+  const lines = [cols.join(',')];
+  rows.forEach(r=>lines.push(cols.map(c=>csvCell(r[c])).join(',')));
+  return lines.join('\r\n');
+}
+
+function downloadCSV(filename, text){
+  // Prepend BOM so Excel opens UTF-8 correctly
+  const blob = new Blob(['\uFEFF'+text], {type:'text/csv;charset=utf-8;'});
+  const url  = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+
+function stamp(){ return new Date().toISOString().slice(0,19).replace(/[:T]/g,'-'); }
+
+// Merge this device's saved records with anything still sitting in the queue
+function collectBackup(kind){
+  const action = kind==='bags' ? 'writeBag' : 'writeItem';
+  const saved  = kind==='bags' ? sessionBags : sessionItems;
+  const seen   = new Set(saved.map(r=>String(r.timestamp)));
+  const queued = queue.filter(q=>q.action===action && q.data && !seen.has(String(q.data.timestamp)))
+                      .map(q=>q.data);
+  return saved.concat(queued);
+}
+
+$('btn-export-bags').addEventListener('click',()=>{
+  const rows = collectBackup('bags');
+  if(!rows.length){ showStatus($('queue-status'),'No bag records stored on this device yet.','info'); return; }
+  downloadCSV(`ecca-bags-${stamp()}.csv`, toCSV(BAG_COLS, rows));
+  showStatus($('queue-status'), `Exported ${rows.length} bag record(s).`, 'success');
+});
+
+$('btn-export-items').addEventListener('click',()=>{
+  const rows = collectBackup('items');
+  if(!rows.length){ showStatus($('queue-status'),'No item records stored on this device yet.','info'); return; }
+  downloadCSV(`ecca-items-${stamp()}.csv`, toCSV(ITEM_COLS, rows));
+  showStatus($('queue-status'), `Exported ${rows.length} item record(s).`, 'success');
+});
+
+// ══════════════════════════════════════════════════════════════
+// DELETE MODAL — shared cancel
+// ══════════════════════════════════════════════════════════════
+$('modal-delete-no').addEventListener('click',()=>closeModal('modal-delete-confirm'));
+$('modal-dup-cancel').addEventListener('click',()=>closeModal('modal-duplicate-bag'));
+$('modal-conn-close').addEventListener('click',()=>closeModal('modal-conn-detail'));
+$('modal-conn-retest').addEventListener('click',async ()=>{
+  const ok = await probeConnection();
+  if(ok){ closeModal('modal-conn-detail'); }
+  else { $('conn-detail-msg').textContent = lastConnError || 'Still not reaching the sheet.'; }
+});
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+function startApp(){
+  LS.load();
+  updateQueueCount();
+  initConnIndicator();
+  probeConnection();   // real round-trip test, not navigator.onLine
+  initChipGroups();
+  initToggleChips();
+  initBrandSearch();
+  initBagTab();
+  initItemsTab();
+  initQuantity();
+  initPresets();
+  initConnSettings();
+  if(activeBag) updateCtxBanner();
+  renderLastBagCard();
+  renderLastItemCard();
+}
+
+// Register the service worker so the applet opens without signal once it has
+// been loaded successfully at least once. Not available on file:// pages,
+// which is one more reason to host this rather than open it from disk.
+if('serviceWorker' in navigator && location.protocol.indexOf('http') === 0){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js').catch(err=>{
+      console.warn('ECCA: offline support unavailable —', err && err.message);
+    });
+  });
+}
+
+// Boot: setup screen only when this device has no endpoint yet
+initSetup();
+const haveConfig = loadConfig();
+if(haveConfig){
+  startApp();
+} else {
+  openSetup(true);
+}
+</script>
+</body>
+</html>
