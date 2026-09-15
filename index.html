@@ -1115,7 +1115,7 @@ header .hdr-top{display:flex;justify-content:space-between;align-items:flex-star
     <label class="setup-label" for="setup-url">Web App URL</label>
     <input type="url" id="setup-url" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off" spellcheck="false" autocapitalize="off"/>
     <div class="setup-hint">The published Apps Script address. It ends in <strong>/exec</strong>.</div>
-    <div class="field-error" id="setup-url-err" style="display:none;margin-top:6px">Enter the /exec URL of your Apps Script web app.</div>
+    <div class="field-error" id="setup-url-err" style="display:none;margin-top:6px">That is not a valid web app address. It must look like https://script.google.com/macros/s/&lt;id&gt;/exec &mdash; no trailing slash, nothing after /exec.</div>
 
     <label class="setup-label" for="setup-token">Access Token</label>
     <input type="text" id="setup-token" placeholder="Paste your token" autocomplete="off" spellcheck="false" autocapitalize="off"/>
@@ -1280,8 +1280,19 @@ function clearFragment(){
   }catch(e){ location.hash = ''; }
 }
 
+// Trim, drop any query/fragment the user pasted along, and remove a trailing
+// slash. "…/exec/" and "…/exec " both look right to the eye but produce a 404
+// once a query string is appended, which is invisible without seeing the URL.
+function normalizeEndpoint(u){
+  let v = String(u||'').trim();
+  v = v.replace(/[\s\u200b\u00a0]+/g,'');          // strip spaces incl. zero-width/nbsp from pasting
+  v = v.replace(/[?#].*$/,'');                      // drop anything after ? or #
+  v = v.replace(/\/+$/,'');                         // drop trailing slashes
+  return v;
+}
+
 function isValidEndpoint(u){
-  return /^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec/.test(String(u||'').trim());
+  return /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(normalizeEndpoint(u));
 }
 
 function loadConfig(){
@@ -1291,19 +1302,19 @@ function loadConfig(){
 
   const frag = readFragmentConfig();
   if(frag){
-    if(frag.url)   url   = frag.url;
+    if(frag.url)   url   = normalizeEndpoint(frag.url);
     if(frag.token !== undefined) token = frag.token;
     clearFragment();
     if(url){ store.set('ecca_url', url); store.set('ecca_token', token); }
   }
 
-  SCRIPT_URL   = url   || SCRIPT_URL_DEFAULT;
+  SCRIPT_URL   = normalizeEndpoint(url || SCRIPT_URL_DEFAULT);
   SCRIPT_TOKEN = token || SCRIPT_TOKEN_DEFAULT;
   return !!SCRIPT_URL;
 }
 
 function saveConfig(url, token){
-  SCRIPT_URL   = String(url||'').trim();
+  SCRIPT_URL   = normalizeEndpoint(url);
   SCRIPT_TOKEN = String(token||'').trim();
   store.set('ecca_url',   SCRIPT_URL);
   store.set('ecca_token', SCRIPT_TOKEN);
@@ -1340,8 +1351,8 @@ function closeSetup(){
 // from the shape of the error and sent people chasing the wrong problem, so
 // this now shows the HTTP status and the start of the real body.
 async function testConfig(url, token){
-  const target = url + (url.indexOf('?')===-1?'?':'&') +
-                 (token ? 'token='+encodeURIComponent(token) : 'ping=1');
+  url = normalizeEndpoint(url);
+  const target = url + '?' + (token ? 'token='+encodeURIComponent(token) : 'ping=1');
   let res, text;
   try{
     res  = await fetch(target);
@@ -1350,7 +1361,7 @@ async function testConfig(url, token){
     return { ok:false,
       msg:'The request never completed — the browser blocked it or the endpoint is unreachable. ' +
           'Browser error: ' + ((e && e.message) || String(e)),
-      detail:'' };
+      detail:'Requested: ' + target };
   }
 
   let data = null;
@@ -1377,16 +1388,21 @@ async function testConfig(url, token){
   else if(looksLikeMoved)  hint = ' This looks like a redirect page that was not followed.';
   else if(!text)           hint = ' The body was empty, which usually means the redirect to Google was blocked before any content arrived.';
 
+  if(res.status === 404)
+    hint = ' A 404 means Google did not recognise this deployment. Compare the URL below, character for character, ' +
+           'with the Web app URL in Deploy → Manage deployments.';
+
   return { ok:false,
     msg:'HTTP ' + res.status + ', but the reply was not data (' + String(text||'').length + ' bytes).' + hint,
-    detail: snippet ? 'Server said: ' + snippet : '(empty response body)' };
+    detail: 'Requested: ' + target + (snippet ? '  |  Server said: ' + snippet.slice(0,100) : '  |  (empty body)') };
 }
 
 function initSetup(){
   $('setup-save').addEventListener('click', async ()=>{
-    const url = $('setup-url').value.trim();
+    const url = normalizeEndpoint($('setup-url').value);
     const token = $('setup-token').value.trim();
     if(!isValidEndpoint(url)){ $('setup-url-err').style.display='block'; return; }
+    $('setup-url').value = url;                      // show what will actually be used
     $('setup-url-err').style.display='none';
 
     $('setup-save').disabled = true;
@@ -1409,7 +1425,7 @@ function initSetup(){
 
   // Escape hatch for a volunteer with no signal at setup time
   $('setup-skip').addEventListener('click', ()=>{
-    const url = $('setup-url').value.trim();
+    const url = normalizeEndpoint($('setup-url').value);
     if(!isValidEndpoint(url)){ $('setup-url-err').style.display='block'; return; }
     saveConfig(url, $('setup-token').value.trim());
     closeSetup();
@@ -2005,7 +2021,7 @@ function setConnState(state, detail){
 // GET URL with the shared secret appended
 function readUrl(){
   if(!SCRIPT_TOKEN) return SCRIPT_URL;
-  return SCRIPT_URL + (SCRIPT_URL.indexOf('?')===-1 ? '?' : '&') + 'token=' + encodeURIComponent(SCRIPT_TOKEN);
+  return SCRIPT_URL + '?token=' + encodeURIComponent(SCRIPT_TOKEN);
 }
 
 // Turn a raw failure into something a field volunteer can act on
