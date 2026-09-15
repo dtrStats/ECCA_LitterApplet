@@ -1335,24 +1335,51 @@ function closeSetup(){
   document.body.classList.remove('setup-open');
 }
 
-// Verify the settings actually work before committing to them
+// Verify the settings actually work before committing to them.
+// Reports what the server ACTUALLY returned. Earlier versions guessed a cause
+// from the shape of the error and sent people chasing the wrong problem, so
+// this now shows the HTTP status and the start of the real body.
 async function testConfig(url, token){
-  const target = url + (url.indexOf('?')===-1?'?':'&') + (token ? 'token='+encodeURIComponent(token) : '');
+  const target = url + (url.indexOf('?')===-1?'?':'&') +
+                 (token ? 'token='+encodeURIComponent(token) : 'ping=1');
+  let res, text;
   try{
-    const res  = await fetch(target);
-    const text = await res.text();
-    let data;
-    try { data = JSON.parse(text); }
-    catch(e){
-      return { ok:false, msg:'The endpoint replied, but not with data. Check that the deployment is published with "Who has access: Anyone".' };
-    }
-    if(data && data.ok) return { ok:true, msg:'Connected. Found '+((data.bags||[]).length)+' bags and '+((data.items||[]).length)+' items.' };
-    if(data && /unauthorized/i.test(String(data.error||'')))
-      return { ok:false, msg:'The endpoint is reachable but rejected this token. Check the token for stray spaces.' };
-    return { ok:false, msg:'The script replied with an error: ' + ((data && data.error) || 'unknown') };
+    res  = await fetch(target);
+    text = await res.text();
   }catch(e){
-    return { ok:false, msg:'Could not reach the endpoint. Check the URL and your connection.' };
+    return { ok:false,
+      msg:'The request never completed — the browser blocked it or the endpoint is unreachable. ' +
+          'Browser error: ' + ((e && e.message) || String(e)),
+      detail:'' };
   }
+
+  let data = null;
+  try { data = JSON.parse(text); } catch(e){}
+
+  if(data && data.ok){
+    const nb = (data.bags||[]).length, ni = (data.items||[]).length;
+    return { ok:true, msg:'Connected. The sheet has ' + nb + ' bags and ' + ni + ' items.' };
+  }
+
+  if(data){
+    const err = String(data.error || 'unknown');
+    if(/unauthorized/i.test(err))
+      return { ok:false, msg:'Reached the sheet, but the token was rejected. Check for a stray space at either end of the token.' };
+    return { ok:false, msg:'The script ran and returned an error: ' + err };
+  }
+
+  // Not JSON. Report the facts rather than assuming a cause.
+  const snippet = String(text||'').replace(/\s+/g,' ').trim().slice(0,160);
+  const looksLikeSignIn = /sign in|accounts\.google|authorization is required/i.test(text||'');
+  const looksLikeMoved  = /moved temporarily|<HTML><HEAD>/i.test(text||'');
+  let hint = '';
+  if(looksLikeSignIn)      hint = ' This looks like a Google sign-in page, which means the deployment is not published for "Anyone".';
+  else if(looksLikeMoved)  hint = ' This looks like a redirect page that was not followed.';
+  else if(!text)           hint = ' The body was empty, which usually means the redirect to Google was blocked before any content arrived.';
+
+  return { ok:false,
+    msg:'HTTP ' + res.status + ', but the reply was not data (' + String(text||'').length + ' bytes).' + hint,
+    detail: snippet ? 'Server said: ' + snippet : '(empty response body)' };
 }
 
 function initSetup(){
@@ -1367,7 +1394,10 @@ function initSetup(){
     const res = await testConfig(url, token);
     $('setup-save').disabled = false;
 
-    if(!res.ok){ showStatus($('setup-status'), res.msg, 'error'); return; }
+    if(!res.ok){
+      showStatus($('setup-status'), res.msg + (res.detail ? '  —  ' + res.detail : ''), 'error');
+      return;
+    }
     showStatus($('setup-status'), res.msg, 'success');
     saveConfig(url, token);
     setTimeout(()=>{
