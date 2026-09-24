@@ -8,7 +8,7 @@
        must always go to the live sheet, and a cached "success" would be a lie.
      - A new deployment bumps CACHE_VERSION, which drops every old cache.
 */
-const CACHE_VERSION = 'ecca-v3';
+const CACHE_VERSION = 'ecca-v4';
 const SHELL = ['./', './index.html', './manifest.webmanifest'];
 
 self.addEventListener('install', event => {

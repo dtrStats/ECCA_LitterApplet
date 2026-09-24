@@ -1250,6 +1250,13 @@ let sessionBags  = [];         // local backup of bags written from this device
 let sessionItems = [];         // local backup of items written from this device
 let presets      = [];         // saved item-form profiles (this device only)
 
+// A record's timestamp is its identity on the sheet. If a save fails
+// ambiguously and the user retries, the SAME timestamp must be sent again —
+// otherwise the server sees a new record and appends a second row. These hold
+// the id of the record currently being attempted.
+let pendingBagTs  = null;
+let pendingItemTs = null;
+
 // ══════════════════════════════════════════════════════════════
 // CONNECTION CONFIG
 // ══════════════════════════════════════════════════════════════
@@ -1830,6 +1837,7 @@ function getFunctionalCategories(){
 }
 
 function clearItemForm(keepQuantity){
+  pendingItemTs = null;                 // a cleared form is a new record
   document.querySelectorAll('#panel-items .chip').forEach(c=>c.classList.remove('selected'));
   SUB_GROUP_IDS.forEach(id=>{ const el=$(id); if(el) el.classList.add('hidden'); });
   $('item-notes').value = '';
@@ -1971,20 +1979,42 @@ function recordRecentBrand(name){
 // ══════════════════════════════════════════════════════════════
 // NETWORK — post to Apps Script with queue
 // ══════════════════════════════════════════════════════════════
+async function postOnce(payload){
+  const res = await fetch(SCRIPT_URL, {
+    method:'POST',
+    body: JSON.stringify(Object.assign({}, payload, { token: SCRIPT_TOKEN })),
+    // No Content-Type header — avoids CORS preflight that Apps Script can't handle
+  });
+  return await res.json();
+}
+
+// An error that is worth trying again. A validation failure (a missing column,
+// a bad token) never heals, so retrying it only wastes the user's time.
+function isTransientError(err){
+  return /failed while accessing|try again|temporarily|timeout|timed out|internal error|service error|unavailable|could not obtain lock|lock/i
+    .test(String(err||''));
+}
+
 async function postToScript(payload){
-  try {
-    const res = await fetch(SCRIPT_URL, {
-      method:'POST',
-      body: JSON.stringify(Object.assign({}, payload, { token: SCRIPT_TOKEN })),
-      // No Content-Type header — avoids CORS preflight that Apps Script can't handle
-    });
-    const data = await res.json();
-    setConnState(true);
-    return data;
-  } catch(e) {
-    setConnState(false, describeConnError(e));
-    return { ok:false, error: e.message, networkFailure:true };
+  // Writes are idempotent server-side (matched on timestamp), so repeating one
+  // is safe: a row that already landed is recognised rather than duplicated.
+  const attempts = 3;
+  let last = null;
+  for(let i = 0; i < attempts; i++){
+    try {
+      const data = await postOnce(payload);
+      setConnState(true);
+      if(data && data.ok) return data;
+      last = data;
+      if(!isTransientError(data && data.error)) return data;   // real rejection
+    } catch(e) {
+      setConnState(false, describeConnError(e));
+      last = { ok:false, error: e.message, networkFailure:true };
+      if(i === attempts - 1) return last;
+    }
+    await new Promise(r=>setTimeout(r, 500 * (i + 1)));
   }
+  return last || { ok:false, error:'Unknown error' };
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -2214,7 +2244,8 @@ async function saveBag(){
 
 async function commitBag(tid,bnum,date,wt){
   const classifier = $('bag-classifier').value.trim();
-  const ts = now();
+  const ts = pendingBagTs || now();
+  pendingBagTs = ts;
   const payload = {
     action:'writeBag',
     data:{
@@ -2235,7 +2266,8 @@ async function commitBag(tid,bnum,date,wt){
     showStatus($('bag-status'),'Bag saved!','success');
   } else if(res && res.ok === false && !res.networkFailure){
     showStatus($('bag-status'),
-      'NOT SAVED. The sheet rejected this bag: ' + (res.error || 'unknown error'),
+      'Not saved: ' + (res.error || 'unknown error') +
+      ' — press Save again. Retrying is safe: this bag will not be added twice.',
       'error');
     $('btn-save-bag').disabled = false;
     return;                                   // do not open a bag that was not written
@@ -2243,6 +2275,7 @@ async function commitBag(tid,bnum,date,wt){
     showStatus($('bag-status'),'Saved to queue (offline). Will retry when connected.','warn');
   }
 
+  pendingBagTs = null;                  // stored; next bag is a new record
   activeBag = { transect_id:tid, bag_number:bnum, classifier_name:classifier };
   lastBag = { timestamp:ts, data:payload.data };
   bagItemCount = 0;                    // new bag starts with a fresh item count
@@ -2510,7 +2543,9 @@ async function saveItem(mode){
     return;
   }
 
-  const ts = now();
+  // Reuse the id if this is a retry of a record that may already have landed
+  const ts = pendingItemTs || now();
+  pendingItemTs = ts;
   const payload = {
     action:'writeItem',
     data:{
@@ -2542,6 +2577,7 @@ async function saveItem(mode){
 
   const savedOk = !!(res && res.ok);
 
+  pendingItemTs = null;                 // stored; next save is a new record
   lastItem = { timestamp:ts, data:payload.data };
   bagItemCount += quantity;
   sessionItems.push(payload.data);     // local backup
@@ -2551,17 +2587,23 @@ async function saveItem(mode){
   updateCtxBanner();
 
   const what = quantity === 1 ? '1 item' : quantity + ' items';
+  const dupNote = (res && res.duplicate) ? ' (already on the sheet — not duplicated)' : '';
 
   // A script-side rejection is NOT an offline queue. The record was dropped,
   // so say so and show the reason rather than implying it is safely waiting.
   if(!savedOk && res && res.ok === false && !res.networkFailure){
-    bagItemCount -= quantity;                       // never happened
+    bagItemCount -= quantity;                       // not counted until stored
     sessionItems = sessionItems.filter(r=>r.timestamp !== ts);
     lastItem = null;
+    // Restore this record's identity. It was cleared above on the assumption
+    // the save had stuck; a retry must send the SAME timestamp so the server
+    // recognises it instead of appending a second row.
+    pendingItemTs = ts;
     LS.save(); renderLastItemCard(); updateCtxBanner();
     showStatus($('item-status'),
-      'NOT SAVED. The sheet rejected this item: ' + (res.error || 'unknown error') +
-      ' — nothing was recorded. Your form is unchanged, so you can retry once the sheet is fixed.',
+      'Not saved: ' + (res.error || 'unknown error') +
+      ' — your entry is unchanged, so press save again. Retrying is safe: if this record ' +
+      'did reach the sheet, it will not be added twice.',
       'error');
     window.scrollTo({top:0,behavior:'smooth'});
     return;
@@ -2572,7 +2614,7 @@ async function saveItem(mode){
   if(mode === 'finish'){
     clearItemForm();
     showStatus($('wt-status'),
-      `${what} ${verb}. Bag total: ${bagItemCount}. Now record the plastic weight.`,
+      `${what} ${verb}${dupNote}. Bag total: ${bagItemCount}. Now record the plastic weight.`,
       savedOk ? 'success' : 'warn');
     switchTab('weights');
     return;
@@ -2583,7 +2625,7 @@ async function saveItem(mode){
     // only needs the one field that differs changed.
     hideStatus($('item-status'));
     showStatus($('item-status'),
-      `${what} ${verb}. Bag total: ${bagItemCount}. Form kept — change what differs, then save again.`,
+      `${what} ${verb}${dupNote}. Bag total: ${bagItemCount}. Form kept — change what differs, then save again.`,
       savedOk ? 'success' : 'warn');
     setTimeout(()=>hideStatus($('item-status')), 3000);
     return;
@@ -2592,7 +2634,7 @@ async function saveItem(mode){
   // 'next' — clear and stay put, keeping the confirmation visible briefly
   clearItemForm();
   showStatus($('item-status'),
-    `${what} ${verb}. Bag total: ${bagItemCount}. Ready for the next one.`,
+    `${what} ${verb}${dupNote}. Bag total: ${bagItemCount}. Ready for the next one.`,
     savedOk ? 'success' : 'warn');
   setTimeout(()=>hideStatus($('item-status')), 2500);
 }
